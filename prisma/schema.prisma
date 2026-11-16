@@ -1,0 +1,344 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PropertySetting {
+  id                  Int      @id @default(1)
+  hotelName           String   @default("TheRoom Resort ชุมแพ")
+  taxId               String   @default("")
+  address             String   @default("")
+  phone               String   @default("")
+  vatRate             Float    @default(7.0)
+  serviceChargeRate   Float    @default(0.0)
+  waterRatePerUnit    Float    @default(18.0)
+  waterMinUnits       Int      @default(0)
+  electricRatePerUnit Float    @default(7.0)
+  electricMinUnits    Int      @default(0)
+  checkInTime         String   @default("14:00")
+  checkOutTime        String   @default("12:00")
+  shortTimeRate       Float    @default(400)
+  shortTimeHours      Int      @default(3)
+  defaultKeyDeposit   Float    @default(200)
+  enableShortTime     Boolean  @default(true)
+  enableMonthly       Boolean  @default(true)
+  updatedAt           DateTime @updatedAt
+}
+
+model User {
+  id                     String                 @id @default(cuid())
+  username               String                 @unique
+  name                   String
+  passwordHash           String
+  role                   String                 @default("FRONT_DESK")
+  allowedMenus           String                 @default("")
+  active                 Boolean                @default(true)
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+  auditLogs              AuditLog[]
+  housekeepingTasks      HousekeepingTask[]
+  passwordResetsReviewed PasswordResetRequest[] @relation("ResetRequestReviewer")
+  passwordResetRequests  PasswordResetRequest[] @relation("ResetRequestUser")
+  paymentsReceived       Payment[]
+  posOrdersCreated       PosOrder[]
+  meterReadings          UtilityMeter[]
+}
+
+model PasswordResetRequest {
+  id           String    @id @default(cuid())
+  userId       String
+  username     String
+  note         String    @default("")
+  status       String    @default("PENDING")
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  reviewedBy   User?     @relation("ResetRequestReviewer", fields: [reviewedById], references: [id])
+  user         User      @relation("ResetRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RoomType {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  name            String
+  baseDailyRate   Float
+  baseMonthlyRate Float
+  maxOccupancy    Int      @default(2)
+  description     String   @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  rooms           Room[]
+}
+
+model Room {
+  id                String             @id @default(cuid())
+  roomNumber        String             @unique
+  floor             Int                @default(1)
+  zone              String             @default("Main")
+  roomTypeId        String
+  status            String             @default("VC")
+  notes             String             @default("")
+  lastWaterMeter    Float              @default(0)
+  lastElectricMeter Float              @default(0)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  housekeepingTasks HousekeepingTask[]
+  roomType          RoomType           @relation(fields: [roomTypeId], references: [id])
+  stays             Stay[]
+  utilityMeters     UtilityMeter[]
+}
+
+model Guest {
+  id           String   @id @default(cuid())
+  fullName     String
+  phone        String
+  email        String   @default("")
+  idType       String   @default("THAI_ID")
+  idNumber     String   @default("")
+  nationality  String   @default("Thai")
+  address      String   @default("")
+  vehiclePlate String   @default("")
+  preferences  String   @default("")
+  tag          String   @default("NORMAL")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  stays        Stay[]
+}
+
+model Stay {
+  id                     String         @id @default(cuid())
+  bookingCode            String         @unique
+  stayType               String         @default("DAILY")
+  status                 String         @default("RESERVED")
+  roomId                 String
+  guestId                String
+  checkInDate            DateTime
+  checkOutDate           DateTime
+  actualCheckIn          DateTime?
+  actualCheckOut         DateTime?
+  rateAmount             Float
+  depositAmount          Float          @default(0)
+  securityDeposit        Float          @default(0)
+  keyDeposit             Float          @default(0)
+  keyDepositMethod       String         @default("CASH")
+  keyDepositStatus       String         @default("NONE")
+  keyDepositRefunded     Float          @default(0)
+  keyDepositRefundMethod String         @default("CASH")
+  keyDepositRefundedAt   DateTime?
+  adults                 Int            @default(1)
+  children               Int            @default(0)
+  notes                  String         @default("")
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  folio                  Folio?
+  posOrders              PosOrder[]
+  guest                  Guest          @relation(fields: [guestId], references: [id])
+  room                   Room           @relation(fields: [roomId], references: [id])
+  utilityMeters          UtilityMeter[]
+}
+
+model UtilityMeter {
+  id             String   @id @default(cuid())
+  roomId         String
+  stayId         String?
+  billingMonth   String
+  prevWater      Float
+  currWater      Float
+  waterUnits     Float
+  waterAmount    Float
+  prevElectric   Float
+  currElectric   Float
+  electricUnits  Float
+  electricAmount Float
+  billed         Boolean  @default(false)
+  recordedById   String?
+  recordedAt     DateTime @default(now())
+  recordedBy     User?    @relation(fields: [recordedById], references: [id])
+  room           Room     @relation(fields: [roomId], references: [id])
+  stay           Stay?    @relation(fields: [stayId], references: [id])
+
+  @@unique([roomId, billingMonth])
+}
+
+model Folio {
+  id            String      @id @default(cuid())
+  stayId        String      @unique
+  status        String      @default("OPEN")
+  totalCharges  Float       @default(0)
+  totalPayments Float       @default(0)
+  balance       Float       @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  stay          Stay        @relation(fields: [stayId], references: [id])
+  items         FolioItem[]
+  payments      Payment[]
+}
+
+model FolioItem {
+  id                  String   @id @default(cuid())
+  folioId             String
+  category            String
+  description         String
+  quantity            Float    @default(1)
+  unitPrice           Float
+  amount              Float
+  vatAmount           Float    @default(0)
+  serviceChargeAmount Float    @default(0)
+  posOrderId          String?
+  createdAt           DateTime @default(now())
+  folio               Folio    @relation(fields: [folioId], references: [id])
+}
+
+model Payment {
+  id           String    @id @default(cuid())
+  folioId      String?
+  posOrderId   String?
+  amount       Float
+  method       String
+  referenceNo  String    @default("")
+  source       String    @default("FRONT_DESK")
+  paidAt       DateTime  @default(now())
+  receivedById String?
+  folio        Folio?    @relation(fields: [folioId], references: [id])
+  posOrder     PosOrder? @relation(fields: [posOrderId], references: [id])
+  receivedBy   User?     @relation(fields: [receivedById], references: [id])
+}
+
+model MenuCategory {
+  id        String     @id @default(cuid())
+  name      String
+  station   String     @default("KITCHEN")
+  sortOrder Int        @default(0)
+  items     MenuItem[]
+}
+
+model MenuItem {
+  id         String         @id @default(cuid())
+  categoryId String
+  sku        String         @default("")
+  barcode    String         @default("")
+  name       String
+  price      Float
+  cost       Float          @default(0)
+  stockQty   Int            @default(0)
+  trackStock Boolean        @default(false)
+  isMinibar  Boolean        @default(false)
+  active     Boolean        @default(true)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  category   MenuCategory   @relation(fields: [categoryId], references: [id])
+  orderItems PosOrderItem[]
+  supplyItem SupplyItem?
+}
+
+model DiningTable {
+  id          String     @id @default(cuid())
+  tableNumber String     @unique
+  zone        String     @default("Indoor")
+  seats       Int        @default(4)
+  status      String     @default("AVAILABLE")
+  orders      PosOrder[]
+}
+
+model PosOrder {
+  id                  String         @id @default(cuid())
+  orderNumber         String         @unique
+  orderType           String
+  status              String         @default("PENDING")
+  tableId             String?
+  stayId              String?
+  subtotal            Float          @default(0)
+  vatAmount           Float          @default(0)
+  serviceChargeAmount Float          @default(0)
+  totalAmount         Float          @default(0)
+  notes               String         @default("")
+  createdById         String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  payments            Payment[]
+  createdBy           User?          @relation(fields: [createdById], references: [id])
+  stay                Stay?          @relation(fields: [stayId], references: [id])
+  table               DiningTable?   @relation(fields: [tableId], references: [id])
+  items               PosOrderItem[]
+}
+
+model PosOrderItem {
+  id            String   @id @default(cuid())
+  orderId       String
+  menuItemId    String
+  quantity      Int
+  unitPrice     Float
+  notes         String   @default("")
+  stationStatus String   @default("PENDING")
+  menuItem      MenuItem @relation(fields: [menuItemId], references: [id])
+  order         PosOrder @relation(fields: [orderId], references: [id])
+}
+
+model HousekeepingTask {
+  id           String    @id @default(cuid())
+  taskCode     String    @default("")
+  roomId       String
+  type         String    @default("CLEANING")
+  priority     String    @default("NORMAL")
+  status       String    @default("PENDING")
+  assignedToId String?
+  notes        String    @default("")
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  assignedTo   User?     @relation(fields: [assignedToId], references: [id])
+  room         Room      @relation(fields: [roomId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String
+  details    String   @default("")
+  createdAt  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+}
+
+model SupplyItem {
+  id         String           @id @default(cuid())
+  menuItemId String?          @unique
+  sku        String           @default("")
+  barcode    String           @default("")
+  name       String
+  category   String           @default("ของใช้ในห้องพัก")
+  unit       String           @default("ชิ้น")
+  cost       Float            @default(0)
+  stockQty   Int              @default(0)
+  minStock   Int              @default(10)
+  active     Boolean          @default(true)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  menuItem   MenuItem?        @relation(fields: [menuItemId], references: [id])
+  movements  SupplyMovement[]
+}
+
+model StockCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model SupplyMovement {
+  id           String     @id @default(cuid())
+  supplyItemId String
+  type         String
+  quantity     Int
+  roomNumber   String     @default("")
+  department   String     @default("แม่บ้าน")
+  notes        String     @default("")
+  userName     String     @default("")
+  createdAt    DateTime   @default(now())
+  supplyItem   SupplyItem @relation(fields: [supplyItemId], references: [id])
+}
