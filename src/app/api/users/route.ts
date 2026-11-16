@@ -136,8 +136,15 @@ export async function PATCH(req: NextRequest) {
     data.role = body.role;
   }
   if (body.active !== undefined) data.active = Boolean(body.active);
-  if (body.password && String(body.password).length >= 4) {
-    data.passwordHash = await bcrypt.hash(String(body.password), 10);
+  if (body.password !== undefined) {
+    const newPassword = String(body.password);
+    if (newPassword.length < 4) {
+      return NextResponse.json(
+        { error: "รหัสผ่านใหม่ต้องมีอย่างน้อย 4 ตัวอักษร" },
+        { status: 400 }
+      );
+    }
+    data.passwordHash = await bcrypt.hash(newPassword, 10);
   }
 
   const updated = await prisma.user.update({

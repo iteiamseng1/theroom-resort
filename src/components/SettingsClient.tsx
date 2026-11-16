@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Pencil, Plus, Save, ShieldCheck, Trash2, UserPlus, X } from "lucide-react";
+import { Check, KeyRound, Pencil, Plus, Save, ShieldCheck, Trash2, UserPlus, X } from "lucide-react";
 import {
   MENU_DEFINITIONS,
   ROLE_LABELS,
@@ -120,6 +120,11 @@ export function SettingsClient({
   const [newPassword, setNewPassword] = useState("");
   const [newRole, setNewRole] = useState<UserRole>("FRONT_DESK");
   const [newMenus, setNewMenus] = useState<string[]>(() => getDefaultMenusForRole("FRONT_DESK"));
+
+  // Edit Staff Password State
+  const [editingPasswordUserId, setEditingPasswordUserId] = useState<string | null>(null);
+  const [editingPasswordValue, setEditingPasswordValue] = useState("");
+  const [passwordUpdatedUserId, setPasswordUpdatedUserId] = useState<string | null>(null);
 
   async function saveSettings(e: React.FormEvent) {
     e.preventDefault();
@@ -290,8 +295,8 @@ export function SettingsClient({
 
   async function updateStaffUser(
     id: string,
-    patch: { role?: string; active?: boolean; allowedMenus?: string[] }
-  ) {
+    patch: { role?: string; active?: boolean; allowedMenus?: string[]; password?: string }
+  ): Promise<boolean> {
     setActionError("");
     const res = await fetch("/api/users", {
       method: "PATCH",
@@ -301,8 +306,26 @@ export function SettingsClient({
     const data = await res.json();
     if (res.ok) {
       setUsers((prev) => prev.map((u) => (u.id === id ? data.user : u)));
+      return true;
     } else {
-      setActionError(data.error || "แก้ไขสิทธิ์ไม่สำเร็จ");
+      setActionError(data.error || "แก้ไขข้อมูลผู้ใช้ไม่สำเร็จ");
+      return false;
+    }
+  }
+
+  async function saveStaffPassword(id: string) {
+    if (editingPasswordValue.length < 4) {
+      setActionError("รหัสผ่านใหม่ต้องมีอย่างน้อย 4 ตัวอักษร");
+      return;
+    }
+    const ok = await updateStaffUser(id, { password: editingPasswordValue });
+    if (ok) {
+      setEditingPasswordUserId(null);
+      setEditingPasswordValue("");
+      setPasswordUpdatedUserId(id);
+      setTimeout(() => {
+        setPasswordUpdatedUserId((prev) => (prev === id ? null : prev));
+      }, 3000);
     }
   }
 
@@ -914,6 +937,23 @@ export function SettingsClient({
                     <button
                       type="button"
                       disabled={isOwnerLocked}
+                      onClick={() => {
+                        if (editingPasswordUserId === u.id) {
+                          setEditingPasswordUserId(null);
+                          setEditingPasswordValue("");
+                        } else {
+                          setEditingPasswordUserId(u.id);
+                          setEditingPasswordValue("");
+                        }
+                      }}
+                      className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+                    >
+                      <KeyRound className="w-3.5 h-3.5 text-amber-600" />
+                      เปลี่ยนรหัสผ่าน
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isOwnerLocked}
                       onClick={() => updateStaffUser(u.id, { active: !u.active })}
                       className={`text-xs font-semibold px-2.5 py-1 rounded-full transition disabled:opacity-50 ${
                         u.active
@@ -925,6 +965,50 @@ export function SettingsClient({
                     </button>
                   </div>
                 </div>
+
+                {passwordUpdatedUserId === u.id && (
+                  <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5" />
+                    เปลี่ยนรหัสผ่านของ {u.username} เรียบร้อยแล้ว
+                  </div>
+                )}
+
+                {editingPasswordUserId === u.id && (
+                  <div className="flex flex-wrap items-center gap-2 bg-amber-50/70 border border-amber-200 rounded-lg p-2.5">
+                    <input
+                      type="password"
+                      placeholder="รหัสผ่านใหม่ (4+ ตัวอักษร)"
+                      value={editingPasswordValue}
+                      onChange={(e) => setEditingPasswordValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          saveStaffPassword(u.id);
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-xs min-w-[200px] flex-1 max-w-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => saveStaffPassword(u.id)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-medium hover:bg-slate-800"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      บันทึกรหัสผ่าน
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingPasswordUserId(null);
+                        setEditingPasswordValue("");
+                      }}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-600 text-xs hover:bg-slate-50"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      ยกเลิก
+                    </button>
+                  </div>
+                )}
 
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   <span className="text-[11px] font-medium text-slate-500 mr-1 self-center">
