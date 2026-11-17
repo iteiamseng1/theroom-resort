@@ -283,42 +283,46 @@ export function AppShell({
       </aside>
 
       {/* Mobile Top Header */}
-      <header className="no-print md:hidden sticky top-0 z-50 w-full bg-[#2D160B] text-[#FAF5EE] border-b border-[#C89B35]/25 px-4 pt-[max(0.625rem,calc(env(safe-area-inset-top)+0.5rem))] pb-2.5 flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <img
-            src="/logo-theroom.svg"
-            alt="The Room Resort"
-            className="w-12 h-auto rounded-md shrink-0 drop-shadow-sm"
-          />
-          <div className="min-w-0">
-            <div className="text-sm font-bold truncate text-[#F6DC93]">{hotelName}</div>
-            <div className="text-[10px] text-[#EADFCF]/80 truncate">
-              {user.name} • {ROLE_LABELS[user.role] ?? user.role}
+      <header className="no-print md:hidden sticky top-0 z-50 w-full bg-[#2D160B] text-[#FAF5EE] border-b border-[#C89B35]/25 pt-[env(safe-area-inset-top,0px)]">
+        <div className="px-4 py-2.5 flex items-center justify-between min-h-[52px]">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img
+              src="/logo-theroom.svg"
+              alt="The Room Resort"
+              className="w-11 h-auto rounded-md shrink-0"
+            />
+            <div className="min-w-0">
+              <div className="text-sm font-bold truncate text-[#F6DC93]">
+                {hotelName}
+              </div>
+              <div className="text-[10px] text-[#EADFCF]/80 truncate">
+                {user.name} • {ROLE_LABELS[user.role] ?? user.role}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {installPrompt && (
+          <div className="flex items-center gap-2">
+            {installPrompt && (
+              <button
+                onClick={handleInstall}
+                className="p-2 rounded-lg bg-[#C89B35]/20 text-[#F6DC93]"
+                title="ติดตั้งแอป"
+              >
+                <Smartphone className="w-4 h-4" />
+              </button>
+            )}
+            {visibleNav.some((n) => n.href === "/settings") && (
+              <Link href="/settings" prefetch={false} className="p-2 rounded-lg hover:bg-[#432313] text-[#EADFCF]">
+                <Settings className="w-4 h-4" />
+              </Link>
+            )}
             <button
-              onClick={handleInstall}
-              className="p-2 rounded-lg bg-[#C89B35]/20 text-[#F6DC93]"
-              title="ติดตั้งแอป"
+              onClick={handleLogout}
+              className="p-2 rounded-lg hover:bg-[#432313] text-[#EADFCF]"
+              title="ออกจากระบบ"
             >
-              <Smartphone className="w-4 h-4" />
+              <LogOut className="w-4 h-4" />
             </button>
-          )}
-          {visibleNav.some((n) => n.href === "/settings") && (
-            <Link href="/settings" prefetch={false} className="p-2 rounded-lg hover:bg-[#432313] text-[#EADFCF]">
-              <Settings className="w-4 h-4" />
-            </Link>
-          )}
-          <button
-            onClick={handleLogout}
-            className="p-2 rounded-lg hover:bg-[#432313] text-[#EADFCF]"
-            title="ออกจากระบบ"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          </div>
         </div>
       </header>
 
