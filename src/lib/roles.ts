@@ -51,7 +51,7 @@ export const MENU_DEFINITIONS: MenuPermissionDef[] = [
   },
   {
     href: "/pos",
-    label: "มินิมาร์ท & POS",
+    label: "ขาย POS",
     defaultRoles: ["OWNER", "MANAGER", "FRONT_DESK", "POS_CASHIER", "KITCHEN"],
   },
   // 2. แม่บ้าน & คลังสินค้า
@@ -72,13 +72,13 @@ export const MENU_DEFINITIONS: MenuPermissionDef[] = [
   },
   {
     href: "/stock",
-    label: "คลังสินค้า & สต๊อก",
+    label: "คลังสินค้า",
     defaultRoles: ["OWNER", "MANAGER", "FRONT_DESK", "POS_CASHIER", "HOUSEKEEPING"],
   },
   // 3. ผู้บริหาร & ระบบ
   {
     href: "/reports",
-    label: "รายงาน & สถิติ",
+    label: "รายงาน",
     defaultRoles: ["OWNER", "MANAGER", "ACCOUNTING"],
   },
   {

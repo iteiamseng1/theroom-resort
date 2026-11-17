@@ -88,7 +88,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1F0F07] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#2D160B] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-[#FAF6EE] border border-[#C89B35]/40 rounded-2xl shadow-2xl overflow-hidden">
         <div className="bg-[#2D160B] text-[#FAF5EE] px-6 py-6 flex flex-col items-center text-center gap-3 border-b border-[#C89B35]/30">
           <ResortLogo className="w-44 h-auto drop-shadow-md" />
@@ -120,7 +120,7 @@ export default function LoginPage() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C89B35] focus:border-[#C89B35]"
                 required
               />
             </div>
@@ -149,7 +149,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C89B35] focus:border-[#C89B35]"
                 required
               />
             </div>

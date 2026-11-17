@@ -65,7 +65,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/pos",
-    label: "มินิมาร์ท & POS",
+    label: "ขาย POS",
     icon: UtensilsCrossed,
     group: "front",
     roles: ["OWNER", "MANAGER", "FRONT_DESK", "POS_CASHIER", "KITCHEN"],
@@ -97,7 +97,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/stock",
-    label: "คลังสินค้า & สต๊อก",
+    label: "คลังสินค้า",
     icon: Boxes,
     group: "ops",
     roles: ["OWNER", "MANAGER", "FRONT_DESK", "POS_CASHIER", "HOUSEKEEPING"],
@@ -106,7 +106,7 @@ const NAV_ITEMS: NavItem[] = [
   // 3. ผู้บริหาร & ระบบ
   {
     href: "/reports",
-    label: "รายงาน & สถิติ",
+    label: "รายงาน",
     icon: FileSpreadsheet,
     group: "admin",
     roles: ["OWNER", "MANAGER", "ACCOUNTING"],
