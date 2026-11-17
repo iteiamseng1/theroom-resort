@@ -41,6 +41,9 @@ prisma/dev.db*
 # vercel
 .vercel
 
+# local duplicates
+/theroom/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

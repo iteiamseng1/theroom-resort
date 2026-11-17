@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { invalidateHotelNameCache } from "@/lib/require-session";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -60,6 +61,7 @@ export async function PUT(req: NextRequest) {
     },
   });
 
+  invalidateHotelNameCache();
   revalidatePath("/", "layout");
   return NextResponse.json({ setting: updated });
 }

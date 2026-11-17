@@ -6,8 +6,11 @@ services:
     region: singapore
     buildCommand: npm install && npm run build
     startCommand: npm run start
+    healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
         sync: false
       - key: AUTH_SECRET
         generateValue: true
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=400"

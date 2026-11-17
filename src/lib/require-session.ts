@@ -3,6 +3,31 @@ import { getCurrentUser, SessionUser, UserRole } from "./auth";
 import { resolveAllowedMenus } from "./roles";
 import { prisma } from "./prisma";
 
+let cachedHotelName: { name: string; timestamp: number } | null = null;
+const CACHE_TTL_MS = 60 * 1000; // 60s cache to avoid querying propertySetting on every page load
+
+export function invalidateHotelNameCache() {
+  cachedHotelName = null;
+}
+
+async function getCachedHotelName(): Promise<string> {
+  const now = Date.now();
+  if (cachedHotelName && now - cachedHotelName.timestamp < CACHE_TTL_MS) {
+    return cachedHotelName.name;
+  }
+  try {
+    const setting = await prisma.propertySetting.findUnique({
+      where: { id: 1 },
+      select: { hotelName: true },
+    });
+    const name = setting?.hotelName || "TheRoom Resort ชุมแพ";
+    cachedHotelName = { name, timestamp: now };
+    return name;
+  } catch {
+    return cachedHotelName?.name || "TheRoom Resort ชุมแพ";
+  }
+}
+
 export async function requireSession(
   allowedRoles?: UserRole[],
   requiredPath?: string
@@ -15,12 +40,12 @@ export async function requireSession(
     redirect("/login");
   }
 
-  const [dbUser, setting] = await Promise.all([
+  const [dbUser, hotelName] = await Promise.all([
     prisma.user.findUnique({
       where: { id: sessionUser.id },
       select: { role: true, active: true, allowedMenus: true, name: true },
     }),
-    prisma.propertySetting.findUnique({ where: { id: 1 } }),
+    getCachedHotelName(),
   ]);
 
   if (!dbUser || !dbUser.active) {
@@ -46,6 +71,6 @@ export async function requireSession(
       role: effectiveRole,
       allowedMenus: effectiveMenus,
     },
-    hotelName: setting?.hotelName || "TheRoom Resort ชุมแพ",
+    hotelName,
   };
 }
