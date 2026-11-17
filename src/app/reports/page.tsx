@@ -29,119 +29,106 @@ export default async function ReportsPage({
   if (to) dateFilter.lte = new Date(`${to}T23:59:59.999`);
   const hasDateFilter = Boolean(from || to);
 
-  const [
-    rooms,
-    staysInRange,
-    payments,
-    posOrders,
-    auditLogs,
-    keyDepositStays,
-    openFolios,
-    supplyIssuesInRange,
-    lowStockMenus,
-    lowStockSupplies,
-    pendingResetCount,
-  ] = await Promise.all([
-    prisma.room.findMany({ include: { roomType: true } }),
-    prisma.stay.findMany({
-      where: hasDateFilter
-        ? {
-            status: { in: ["CHECKED_IN", "CHECKED_OUT"] },
-            OR: [
-              { actualCheckIn: dateFilter },
-              { checkInDate: dateFilter },
-            ],
-          }
-        : { status: "CHECKED_IN" },
-      select: {
-        id: true,
-        stayType: true,
-        status: true,
-        room: { select: { roomNumber: true, roomType: { select: { code: true } } } },
-        folio: {
-          select: {
-            payments: {
-              select: { source: true, method: true, amount: true },
-            },
+  // Execute sequentially on a single warm connection to avoid Neon connection pool storms
+  const rooms = await prisma.room.findMany({ include: { roomType: true } });
+  const staysInRange = await prisma.stay.findMany({
+    where: hasDateFilter
+      ? {
+          status: { in: ["CHECKED_IN", "CHECKED_OUT"] },
+          OR: [
+            { actualCheckIn: dateFilter },
+            { checkInDate: dateFilter },
+          ],
+        }
+      : { status: "CHECKED_IN" },
+    select: {
+      id: true,
+      stayType: true,
+      status: true,
+      room: { select: { roomNumber: true, roomType: { select: { code: true } } } },
+      folio: {
+        select: {
+          payments: {
+            select: { source: true, method: true, amount: true },
           },
         },
       },
-    }),
-    prisma.payment.findMany({
-      where: hasDateFilter ? { paidAt: dateFilter } : undefined,
-    }),
-    prisma.posOrder.findMany({
-      where: {
-        status: { not: "CANCELLED" },
-        ...(hasDateFilter ? { createdAt: dateFilter } : {}),
-      },
-      include: {
-        items: { include: { menuItem: { select: { name: true } } } },
-      },
-    }),
-    prisma.auditLog.findMany({
-      where: hasDateFilter ? { createdAt: dateFilter } : undefined,
-      include: { user: true },
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    }),
-    prisma.stay.findMany({
-      where: { keyDeposit: { gt: 0 } },
-      select: {
-        keyDeposit: true,
-        keyDepositMethod: true,
-        keyDepositStatus: true,
-        keyDepositRefunded: true,
-        keyDepositRefundMethod: true,
-        keyDepositRefundedAt: true,
-        actualCheckIn: true,
-        createdAt: true,
-        folio: {
-          select: {
-            balance: true,
-            payments: {
-              select: { source: true, method: true, amount: true },
-            },
+    },
+  });
+  const payments = await prisma.payment.findMany({
+    where: hasDateFilter ? { paidAt: dateFilter } : undefined,
+  });
+  const posOrders = await prisma.posOrder.findMany({
+    where: {
+      status: { not: "CANCELLED" },
+      ...(hasDateFilter ? { createdAt: dateFilter } : {}),
+    },
+    include: {
+      items: { include: { menuItem: { select: { name: true } } } },
+    },
+  });
+  const auditLogs = await prisma.auditLog.findMany({
+    where: hasDateFilter ? { createdAt: dateFilter } : undefined,
+    include: { user: true },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
+  const keyDepositStays = await prisma.stay.findMany({
+    where: { keyDeposit: { gt: 0 } },
+    select: {
+      keyDeposit: true,
+      keyDepositMethod: true,
+      keyDepositStatus: true,
+      keyDepositRefunded: true,
+      keyDepositRefundMethod: true,
+      keyDepositRefundedAt: true,
+      actualCheckIn: true,
+      createdAt: true,
+      folio: {
+        select: {
+          balance: true,
+          payments: {
+            select: { source: true, method: true, amount: true },
           },
         },
       },
-    }),
-    prisma.folio.findMany({
-      where: { status: "OPEN", balance: { gt: 0 } },
-      select: {
-        id: true,
-        balance: true,
-        stay: {
-          select: {
-            bookingCode: true,
-            room: { select: { roomNumber: true } },
-            guest: { select: { fullName: true, phone: true } },
-          },
+    },
+  });
+  const openFolios = await prisma.folio.findMany({
+    where: { status: "OPEN", balance: { gt: 0 } },
+    select: {
+      id: true,
+      balance: true,
+      stay: {
+        select: {
+          bookingCode: true,
+          room: { select: { roomNumber: true } },
+          guest: { select: { fullName: true, phone: true } },
         },
       },
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.supplyMovement.findMany({
-      where: {
-        type: "ISSUE",
-        ...(hasDateFilter ? { createdAt: dateFilter } : {}),
-      },
-      include: { supplyItem: { select: { name: true, unit: true } } },
-    }),
-    prisma.menuItem.findMany({
-      where: { active: true, trackStock: true, stockQty: { lte: 5 } },
-      select: { id: true, name: true, stockQty: true },
-      orderBy: { stockQty: "asc" },
-      take: 6,
-    }),
-    prisma.supplyItem.findMany({
-      where: { active: true, stockQty: { lte: 10 } },
-      select: { id: true, name: true, stockQty: true, minStock: true, unit: true },
-      orderBy: { stockQty: "asc" },
-      take: 10,
-    }),
-    prisma.passwordResetRequest.count({ where: { status: "PENDING" } }),
-  ]);
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+  const supplyIssuesInRange = await prisma.supplyMovement.findMany({
+    where: {
+      type: "ISSUE",
+      ...(hasDateFilter ? { createdAt: dateFilter } : {}),
+    },
+    include: { supplyItem: { select: { name: true, unit: true } } },
+  });
+  const lowStockMenus = await prisma.menuItem.findMany({
+    where: { active: true, trackStock: true, stockQty: { lte: 5 } },
+    select: { id: true, name: true, stockQty: true },
+    orderBy: { stockQty: "asc" },
+    take: 6,
+  });
+  const lowStockSupplies = await prisma.supplyItem.findMany({
+    where: { active: true, stockQty: { lte: 10 } },
+    select: { id: true, name: true, stockQty: true, minStock: true, unit: true },
+    orderBy: { stockQty: "asc" },
+    take: 10,
+  });
+  const pendingResetCount = await prisma.passwordResetRequest.count({ where: { status: "PENDING" } });
 
   const totalOutstandingBalance = openFolios.reduce((s, f) => s + f.balance, 0);
   const unpaidFolioCount = openFolios.length;

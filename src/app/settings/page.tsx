@@ -6,29 +6,27 @@ import { requireSession } from "@/lib/require-session";
 export default async function SettingsPage() {
   const { user, hotelName } = await requireSession(["OWNER", "MANAGER"], "/settings");
 
-  const [setting, roomTypes, rooms, users, resetRequests] = await Promise.all([
-    prisma.propertySetting.findUnique({ where: { id: 1 } }),
-    prisma.roomType.findMany({ orderBy: { code: "asc" } }),
-    prisma.room.findMany({ include: { roomType: true }, orderBy: { roomNumber: "asc" } }),
-    prisma.user.findMany({
-      select: {
-        id: true,
-        username: true,
-        name: true,
-        role: true,
-        allowedMenus: true,
-        active: true,
-      },
-      orderBy: { createdAt: "asc" },
-    }),
-    prisma.passwordResetRequest.findMany({
-      where: { status: "PENDING" },
-      include: {
-        user: { select: { id: true, username: true, name: true, role: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-  ]);
+  const setting = await prisma.propertySetting.findUnique({ where: { id: 1 } });
+  const roomTypes = await prisma.roomType.findMany({ orderBy: { code: "asc" } });
+  const rooms = await prisma.room.findMany({ include: { roomType: true }, orderBy: { roomNumber: "asc" } });
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      username: true,
+      name: true,
+      role: true,
+      allowedMenus: true,
+      active: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+  const resetRequests = await prisma.passwordResetRequest.findMany({
+    where: { status: "PENDING" },
+    include: {
+      user: { select: { id: true, username: true, name: true, role: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <AppShell user={user} hotelName={hotelName}>

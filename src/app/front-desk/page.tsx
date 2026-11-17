@@ -11,24 +11,23 @@ export default async function FrontDeskPage() {
     "ACCOUNTING",
   ], "/front-desk");
 
-  const [rooms, guests, setting] = await Promise.all([
-    prisma.room.findMany({
-      include: {
-        roomType: true,
-        stays: {
-          where: { status: { in: ["RESERVED", "CHECKED_IN"] } },
-          include: { guest: true, folio: true },
-          orderBy: { checkInDate: "asc" },
-        },
+  const rooms = await prisma.room.findMany({
+    include: {
+      roomType: true,
+      stays: {
+        where: { status: { in: ["RESERVED", "CHECKED_IN"] } },
+        include: { guest: true, folio: true },
+        orderBy: { checkInDate: "asc" },
       },
-      orderBy: { roomNumber: "asc" },
-    }),
-    prisma.guest.findMany({
-      select: { id: true, fullName: true, phone: true, idNumber: true, tag: true },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.propertySetting.findUnique({ where: { id: 1 } }),
-  ]);
+    },
+    orderBy: { roomNumber: "asc" },
+  });
+  const guests = await prisma.guest.findMany({
+    select: { id: true, fullName: true, phone: true, idNumber: true, tag: true },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+  });
+  const setting = await prisma.propertySetting.findUnique({ where: { id: 1 } });
 
   const serialized = rooms.map((r) => ({
     ...r,
