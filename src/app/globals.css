@@ -11,16 +11,19 @@ body {
 }
 
 @page {
-  size: A4 portrait;
-  margin: 12mm;
+  size: 210mm 148.5mm; /* ครึ่ง A4 (Half A4 / A5 Landscape: 210mm x 148.5mm) */
+  margin: 5mm 8mm;
 }
 
 @media print {
   html,
   body {
-    width: 210mm;
+    width: 210mm !important;
+    max-width: 210mm !important;
     background: #ffffff !important;
     color: #0f172a !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -39,17 +42,18 @@ body {
     overflow: visible !important;
   }
 
-  .print-a4 {
+  .print-a4,
+  .print-half-a4 {
     position: static !important;
     width: 100% !important;
-    max-width: none !important;
-    max-height: none !important;
-    overflow: visible !important;
+    max-width: 100% !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #ffffff !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }

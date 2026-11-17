@@ -291,50 +291,51 @@ export function BillingClient({
           </div>
         </div>
 
-        {/* Selected Folio Detail + Printable Receipt */}
+        {/* Selected Folio Detail + Printable Receipt (ครึ่ง A4) */}
         <div className="lg:col-span-2 space-y-5">
           {selected ? (
             <>
-              <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
-                {/* Print Header */}
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-4 border-b border-slate-200 pb-4">
+              <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4 print-half-a4">
+                {/* Print Header: 2 Columns for Half-A4 */}
+                <div className="flex justify-between items-start border-b-2 border-slate-900 pb-2.5 gap-4">
                   <div className="flex items-start gap-3">
-                    <ResortLogo className="w-24 h-auto shrink-0" />
-                    <div>
-                      <h2 className="text-lg font-bold text-slate-900">{setting.hotelName}</h2>
-                      <p className="text-xs text-slate-500">
+                    <ResortLogo className="w-16 h-auto shrink-0 mt-0.5" />
+                    <div className="space-y-0.5">
+                      <h2 className="text-base font-bold text-slate-900 leading-tight">
+                        {setting.hotelName}
+                      </h2>
+                      <p className="text-[10px] text-slate-600 leading-tight">
                         {setting.address} {setting.phone ? `• โทร ${setting.phone}` : ""}
                       </p>
                       {setting.taxId && (
-                        <p className="text-xs text-slate-500">
+                        <p className="text-[10px] text-slate-600">
                           เลขประจำตัวผู้เสียภาษี: {setting.taxId}
                         </p>
                       )}
                     </div>
                   </div>
-                  <div className="sm:text-right">
-                    <div className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-900">
+                  <div className="text-right shrink-0">
+                    <div className="inline-flex items-center gap-1.5 text-base font-bold text-slate-900">
                       <Receipt
-                        className={`w-4 h-4 ${
+                        className={`w-4 h-4 no-print ${
                           selected.balance > 0 ? "text-amber-600" : "text-emerald-600"
                         }`}
                       />
-                      {selected.balance > 0 ? "ใบแจ้งหนี้" : "ใบเสร็จรับเงิน"}
+                      {selected.balance > 0 ? "ใบแจ้งหนี้ (Invoice)" : "ใบเสร็จรับเงิน (Receipt)"}
                     </div>
-                    <div className="text-xs text-slate-600 mt-1">
+                    <div className="text-xs font-bold text-slate-800 mt-0.5">
                       ห้อง {selected.stay.room.roomNumber} ({selected.stay.bookingCode})
                     </div>
-                    <div className="text-xs text-slate-600">
-                      ผู้เข้าพัก: {selected.stay.guest.fullName}
+                    <div className="text-[11px] text-slate-600">
+                      ผู้เข้าพัก: <span className="font-semibold">{selected.stay.guest.fullName}</span>
                     </div>
                     {selected.stay.guest.idNumber && (
-                      <div className="text-xs text-slate-600">
-                        เลขประจำตัวผู้เสียภาษี:{" "}
-                        <span className="font-mono">{selected.stay.guest.idNumber}</span>
+                      <div className="text-[10px] text-slate-500">
+                        เลขผู้เสียภาษี: <span className="font-mono">{selected.stay.guest.idNumber}</span>
                       </div>
                     )}
                     {(selected.stay.keyDeposit ?? 0) > 0 && (
-                      <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold">
+                      <div className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold">
                         ค่ามัดจำกุญแจ: ฿{(selected.stay.keyDeposit ?? 0).toLocaleString()} (
                         {selected.stay.keyDepositStatus === "RETURNED"
                           ? "คืนแล้ว"
@@ -348,30 +349,30 @@ export function BillingClient({
                 </div>
 
                 {/* Line Items */}
-                <div>
-                  <table className="w-full text-sm">
+                <div className="border border-slate-200 rounded overflow-hidden">
+                  <table className="w-full text-xs border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-200 text-xs text-slate-500 text-left">
-                        <th className="py-2">รายการ</th>
-                        <th className="py-2 text-right">จำนวน</th>
-                        <th className="py-2 text-right">ราคา/หน่วย</th>
-                        <th className="py-2 text-right">รวม (฿)</th>
+                      <tr className="bg-slate-100 border-b border-slate-200 text-[11px] font-bold text-slate-700">
+                        <th className="py-1 px-2 text-left">รายการ</th>
+                        <th className="py-1 px-2 text-right w-16">จำนวน</th>
+                        <th className="py-1 px-2 text-right w-20">ราคา/หน่วย</th>
+                        <th className="py-1 px-2 text-right w-24">รวม (฿)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {selected.items.map((item) => (
-                        <tr key={item.id}>
-                          <td className="py-2.5 text-slate-800">
-                            <div>{item.description}</div>
-                            <div className="text-[10px] text-slate-400">
-                              {CATEGORY_LABELS[item.category] ?? item.category}
-                            </div>
+                        <tr key={item.id} className="leading-tight">
+                          <td className="py-1 px-2 text-slate-800">
+                            <span className="font-medium">{item.description}</span>
+                            <span className="text-[10px] text-slate-400 ml-1.5">
+                              ({CATEGORY_LABELS[item.category] ?? item.category})
+                            </span>
                           </td>
-                          <td className="py-2.5 text-right">{item.quantity}</td>
-                          <td className="py-2.5 text-right">
+                          <td className="py-1 px-2 text-right font-mono">{item.quantity}</td>
+                          <td className="py-1 px-2 text-right font-mono">
                             {item.unitPrice.toLocaleString()}
                           </td>
-                          <td className="py-2.5 text-right font-medium">
+                          <td className="py-1 px-2 text-right font-mono font-medium">
                             {item.amount.toLocaleString()}
                           </td>
                         </tr>
@@ -380,47 +381,65 @@ export function BillingClient({
                   </table>
                 </div>
 
-                {/* Totals */}
-                <div className="border-t border-slate-200 pt-4 space-y-1.5 text-sm">
-                  <div className="flex justify-between text-slate-600">
-                    <span>ยอดค่าใช้จ่ายรวม</span>
-                    <span>฿{selected.totalCharges.toLocaleString()}</span>
+                {/* Totals & History */}
+                <div className="grid grid-cols-2 gap-4 text-xs pt-1">
+                  <div>
+                    {selected.payments.length > 0 && (
+                      <div className="border border-slate-200 rounded p-2 bg-slate-50/50 space-y-1">
+                        <div className="text-[11px] font-bold text-slate-700">ประวัติการชำระเงิน</div>
+                        {selected.payments.map((p) => (
+                          <div
+                            key={p.id}
+                            className="flex justify-between text-[10px] text-slate-600"
+                          >
+                            <span>
+                              {PAYMENT_LABELS[p.method] ?? p.method}{" "}
+                              {p.referenceNo ? `(${p.referenceNo})` : ""} •{" "}
+                              {new Date(p.paidAt).toLocaleDateString("th-TH")}
+                            </span>
+                            <span className="font-mono font-semibold text-emerald-700">
+                              ฿{p.amount.toLocaleString()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-between text-emerald-700">
-                    <span>ชำระแล้วรวม</span>
-                    <span>-฿{selected.totalPayments.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-lg font-bold text-slate-900 pt-2 border-t border-slate-100">
-                    <span>ยอดคงเหลือสุทธิ</span>
-                    <span className={selected.balance > 0 ? "text-rose-600" : "text-emerald-600"}>
-                      ฿{selected.balance.toLocaleString()}
-                    </span>
+                  <div className="space-y-1 text-right">
+                    <div className="flex justify-between text-slate-600 text-xs">
+                      <span>ยอดค่าใช้จ่ายรวม</span>
+                      <span className="font-mono font-bold">฿{selected.totalCharges.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-emerald-700 text-xs">
+                      <span>ชำระแล้วรวม</span>
+                      <span className="font-mono font-bold">-฿{selected.totalPayments.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm font-bold text-slate-900 border-t border-b border-slate-900 py-1">
+                      <span>ยอดคงเหลือสุทธิ</span>
+                      <span className={`font-mono text-base ${selected.balance > 0 ? "text-rose-600" : "text-emerald-600"}`}>
+                        ฿{selected.balance.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="pt-3 flex justify-end gap-6 text-[10px] text-slate-600 text-center">
+                      <div>
+                        <div className="w-24 border-b border-slate-400 mb-1"></div>
+                        <div>( ผู้รับเงิน / เจ้าหน้าที่ )</div>
+                      </div>
+                      <div>
+                        <div className="w-24 border-b border-slate-400 mb-1"></div>
+                        <div>( ผู้เข้าพัก / ลูกค้า )</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Payment History */}
-                {selected.payments.length > 0 && (
-                  <div className="pt-3 border-t border-slate-100">
-                    <div className="text-xs font-semibold text-slate-600 mb-2">ประวัติการรับชำระ</div>
-                    <div className="space-y-1">
-                      {selected.payments.map((p) => (
-                        <div
-                          key={p.id}
-                          className="flex justify-between text-xs text-slate-600"
-                        >
-                          <span>
-                            {PAYMENT_LABELS[p.method] ?? p.method}{" "}
-                            {p.referenceNo ? `(${p.referenceNo})` : ""} •{" "}
-                            {new Date(p.paidAt).toLocaleString("th-TH")}
-                          </span>
-                          <span className="font-semibold text-emerald-700">
-                            ฿{p.amount.toLocaleString()}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Tear-off Guide Line (For Full A4 Paper) */}
+                <div className="hidden print:flex items-center gap-2 pt-2 text-[10px] text-slate-400 border-t border-dashed border-slate-300 mt-2">
+                  <span>✂</span>
+                  <span className="flex-1 border-b border-dashed border-slate-300"></span>
+                  <span>รอยตัด / ฉีกครึ่งหน้า A4</span>
+                  <span className="flex-1 border-b border-dashed border-slate-300"></span>
+                </div>
               </div>
 
               {/* Action Forms (Hidden on Print) */}

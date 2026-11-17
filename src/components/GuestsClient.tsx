@@ -611,41 +611,41 @@ export function GuestsClient({
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto print-a4"
+              className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto print-half-a4"
             >
-              <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between print:hidden">
+              <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between no-print">
                 <h2 className="font-bold text-sm text-slate-900">ใบแจ้งหนี้ / ใบวางบิล (เครดิต)</h2>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => window.print()}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold cursor-pointer"
                   >
-                    <Printer className="w-3.5 h-3.5" /> พิมพ์ใบแจ้งหนี้
+                    <Printer className="w-3.5 h-3.5" /> พิมพ์บิลครึ่ง A4
                   </button>
                   <button
                     type="button"
                     onClick={() => setInvoiceGuest(null)}
-                    className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"
+                    className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
-              <div className="p-6 space-y-5 text-sm">
-                <div className="flex flex-wrap justify-between gap-4 border-b border-slate-200 pb-4">
+              <div className="p-5 space-y-3 text-sm">
+                <div className="flex justify-between items-start border-b-2 border-slate-900 pb-2.5 gap-4">
                   <div>
-                    <div className="text-lg font-bold text-slate-900">{setting.hotelName}</div>
-                    {setting.address && <div className="text-xs text-slate-500">{setting.address}</div>}
-                    <div className="text-xs text-slate-500">
+                    <div className="text-base font-bold text-slate-900 leading-tight">{setting.hotelName}</div>
+                    {setting.address && <div className="text-[10px] text-slate-500 leading-tight">{setting.address}</div>}
+                    <div className="text-[10px] text-slate-500">
                       {setting.phone ? `โทร ${setting.phone}` : ""}
                       {setting.taxId ? ` · เลขผู้เสียภาษี ${setting.taxId}` : ""}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-base font-extrabold text-rose-700">ใบแจ้งหนี้ / ใบวางบิล</div>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-sm font-extrabold text-rose-700">ใบแจ้งหนี้ / ใบวางบิล</div>
+                    <div className="text-[11px] text-slate-500">
                       วันที่ออกเอกสาร:{" "}
                       {new Date().toLocaleDateString("th-TH", {
                         year: "numeric",
@@ -656,66 +656,74 @@ export function GuestsClient({
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-slate-50 border border-slate-200 p-3.5 space-y-1 text-xs">
-                  <div className="font-bold text-slate-900 text-sm">
+                <div className="rounded-lg bg-slate-50 border border-slate-200 p-2 space-y-0.5 text-xs">
+                  <div className="font-bold text-slate-900">
                     เรียกเก็บเงินจาก: {invoiceGuest.fullName}
                   </div>
                   {invoiceGuest.idNumber && (
-                    <div className="text-slate-600 font-mono">
+                    <div className="text-slate-600 font-mono text-[11px]">
                       เลขประจำตัวผู้เสียภาษี / บัตรประชาชน: {invoiceGuest.idNumber}
                     </div>
                   )}
                   {invoiceGuest.address && (
-                    <div className="text-slate-600">ที่อยู่: {invoiceGuest.address}</div>
+                    <div className="text-slate-600 text-[11px]">ที่อยู่: {invoiceGuest.address}</div>
                   )}
-                  <div className="text-slate-600">
+                  <div className="text-slate-600 text-[11px]">
                     โทร: {invoiceGuest.phone || "-"}
                     {invoiceGuest.email ? ` · อีเมล: ${invoiceGuest.email}` : ""}
                   </div>
                 </div>
 
-                <table className="w-full text-xs border border-slate-200 rounded-lg overflow-hidden">
+                <table className="w-full text-xs border border-slate-200 rounded overflow-hidden border-collapse">
                   <thead className="bg-slate-100 text-slate-700">
-                    <tr>
-                      <th className="text-left px-3 py-2 font-semibold">รหัสเข้าพัก / ห้อง</th>
-                      <th className="text-left px-3 py-2 font-semibold">วันที่เข้าพัก</th>
-                      <th className="text-right px-3 py-2 font-semibold">ยอดรวม</th>
-                      <th className="text-right px-3 py-2 font-semibold">ชำระแล้ว</th>
-                      <th className="text-right px-3 py-2 font-semibold">ยอดค้างชำระ</th>
+                    <tr className="border-b border-slate-200 text-[11px]">
+                      <th className="text-left px-2 py-1 font-semibold">รหัสเข้าพัก / ห้อง</th>
+                      <th className="text-left px-2 py-1 font-semibold">วันที่เข้าพัก</th>
+                      <th className="text-right px-2 py-1 font-semibold">ยอดรวม</th>
+                      <th className="text-right px-2 py-1 font-semibold">ชำระแล้ว</th>
+                      <th className="text-right px-2 py-1 font-semibold">ยอดค้างชำระ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {unpaid.map((s) => (
-                      <tr key={s.id}>
-                        <td className="px-3 py-2 font-medium text-slate-900">
+                      <tr key={s.id} className="leading-tight">
+                        <td className="px-2 py-1 font-medium text-slate-900">
                           ห้อง {s.room.roomNumber} ({s.bookingCode})
                         </td>
-                        <td className="px-3 py-2 text-slate-600">
+                        <td className="px-2 py-1 text-slate-600">
                           {new Date(s.checkInDate).toLocaleDateString("th-TH")}
                         </td>
-                        <td className="px-3 py-2 text-right text-slate-700">
+                        <td className="px-2 py-1 text-right text-slate-700 font-mono">
                           ฿{(s.folio?.totalCharges ?? 0).toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                         </td>
-                        <td className="px-3 py-2 text-right text-emerald-700">
+                        <td className="px-2 py-1 text-right text-emerald-700 font-mono">
                           ฿{(s.folio?.totalPayments ?? 0).toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                         </td>
-                        <td className="px-3 py-2 text-right font-bold text-rose-600">
+                        <td className="px-2 py-1 text-right font-bold text-rose-600 font-mono">
                           ฿{(s.folio?.balance ?? 0).toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                         </td>
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot className="bg-rose-50 border-t border-rose-200">
+                  <tfoot className="bg-rose-50 border-t border-rose-200 font-bold">
                     <tr>
-                      <td colSpan={4} className="px-3 py-2.5 text-right font-bold text-rose-950">
+                      <td colSpan={4} className="px-2 py-1.5 text-right font-bold text-rose-950 text-xs">
                         รวมยอดแจ้งหนี้สุทธิ ({unpaid.length} รายการ)
                       </td>
-                      <td className="px-3 py-2.5 text-right font-extrabold text-rose-600 text-sm">
+                      <td className="px-2 py-1.5 text-right font-extrabold text-rose-600 text-sm font-mono">
                         ฿{totalDue.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                       </td>
                     </tr>
                   </tfoot>
                 </table>
+
+                {/* Tear-off Guide Line (For Full A4 Paper) */}
+                <div className="hidden print:flex items-center gap-2 pt-2 text-[10px] text-slate-400 border-t border-dashed border-slate-300 mt-2">
+                  <span>✂</span>
+                  <span className="flex-1 border-b border-dashed border-slate-300"></span>
+                  <span>รอยตัด / ฉีกครึ่งหน้า A4</span>
+                  <span className="flex-1 border-b border-dashed border-slate-300"></span>
+                </div>
               </div>
             </div>
           </div>

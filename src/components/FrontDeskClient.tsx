@@ -1525,82 +1525,136 @@ export function FrontDeskClient({
       )}
     </div>
 
-      {/* Printable Quick Receipt Modal */}
+      {/* Printable Quick Receipt Modal (ครึ่ง A4) */}
       {payReceipt && (
         <div className="fixed inset-0 z-[60] bg-slate-950/60 flex items-center justify-center p-4 print-overlay">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 print-a4">
-            <div className="text-center border-b border-dashed border-slate-300 pb-3 space-y-0.5">
-              <ResortLogo className="w-28 h-auto mx-auto mb-2" />
-              {propertySetting?.hotelName && (
-                <div className="font-bold text-sm text-slate-900">{propertySetting.hotelName}</div>
-              )}
-              {propertySetting?.address && propertySetting.address !== "-" && (
-                <div className="text-[11px] text-slate-500">{propertySetting.address}</div>
-              )}
-              {propertySetting?.phone && propertySetting.phone !== "-" && (
-                <div className="text-[11px] text-slate-500">โทร {propertySetting.phone}</div>
-              )}
-              {propertySetting?.taxId && propertySetting.taxId !== "-" && (
-                <div className="text-[11px] text-slate-500">เลขประจำตัวผู้เสียภาษี {propertySetting.taxId}</div>
-              )}
-              <div className="font-bold text-base text-slate-900 pt-1">ใบเสร็จรับเงิน</div>
-              <div className="text-xs text-slate-500 mt-0.5">
-                ห้อง {payReceipt.roomNumber} • {payReceipt.bookingCode}
-              </div>
-              <div className="text-[11px] text-slate-400">{payReceipt.paidAt}</div>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-slate-500">ผู้เข้าพัก</span>
-                <span className="font-medium text-slate-900">{payReceipt.guestName}</span>
-              </div>
-              {payReceipt.guestTaxId && (
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-500">เลขประจำตัวผู้เสียภาษี</span>
-                  <span className="font-mono font-medium text-slate-900">
-                    {payReceipt.guestTaxId}
-                  </span>
+          <div className="bg-white rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl space-y-3 print-half-a4 border border-slate-200">
+            {/* Header: 2 Columns for Half-A4 */}
+            <div className="flex justify-between items-start border-b-2 border-slate-900 pb-2.5 gap-4">
+              <div className="flex items-start gap-3">
+                <ResortLogo className="w-16 h-auto shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <div className="font-bold text-sm text-slate-900 leading-tight">
+                    {propertySetting?.hotelName || "TheRoom Resort ชุมแพ"}
+                  </div>
+                  {propertySetting?.address && propertySetting.address !== "-" && (
+                    <div className="text-[10px] text-slate-600 leading-tight">
+                      {propertySetting.address}
+                    </div>
+                  )}
+                  <div className="text-[10px] text-slate-600 flex flex-wrap gap-x-2">
+                    {propertySetting?.phone && propertySetting.phone !== "-" && (
+                      <span>โทร: {propertySetting.phone}</span>
+                    )}
+                    {propertySetting?.taxId && propertySetting.taxId !== "-" && (
+                      <span>เลขผู้เสียภาษี: {propertySetting.taxId}</span>
+                    )}
+                  </div>
                 </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-slate-500">ช่องทางชำระ</span>
-                <span className="font-medium text-slate-900">
+              </div>
+              <div className="text-right shrink-0">
+                <div className="font-bold text-sm text-slate-900">ใบเสร็จรับเงิน</div>
+                <div className="text-xs font-bold text-emerald-800">
+                  ห้อง {payReceipt.roomNumber} ({payReceipt.bookingCode})
+                </div>
+                <div className="text-[10px] text-slate-500">{payReceipt.paidAt}</div>
+              </div>
+            </div>
+
+            {/* Guest & Payment Info Bar */}
+            <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 border border-slate-200 p-2 rounded-lg">
+              <div>
+                <span className="text-slate-500">ผู้เข้าพัก:</span>{" "}
+                <span className="font-bold text-slate-900">{payReceipt.guestName}</span>
+                {payReceipt.guestTaxId && (
+                  <span className="text-slate-500 text-[10px] block">
+                    เลขผู้เสียภาษี: {payReceipt.guestTaxId}
+                  </span>
+                )}
+              </div>
+              <div className="text-right">
+                <span className="text-slate-500">ช่องทางชำระ:</span>{" "}
+                <span className="font-bold text-slate-900">
                   {payReceipt.method}
                   {payReceipt.referenceNo ? ` (${payReceipt.referenceNo})` : ""}
                 </span>
               </div>
-              {payReceipt.items.length > 0 && (
-                <div className="pt-2 border-t border-dashed border-slate-200 space-y-1">
-                  <div className="text-[11px] font-semibold text-slate-400">รายการ</div>
-                  {payReceipt.items.map((item) => (
-                    <div key={item.id} className="flex justify-between text-xs">
-                      <span className="text-slate-700">{item.description}</span>
-                      <span className="font-medium text-slate-900">
-                        ฿{item.amount.toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="flex justify-between text-base font-bold text-emerald-700 pt-2 border-t border-slate-100">
-                <span>ยอดชำระ</span>
-                <span>฿{payReceipt.amount.toLocaleString()}</span>
+            </div>
+
+            {/* Items Table */}
+            {payReceipt.items.length > 0 && (
+              <div className="border border-slate-200 rounded overflow-hidden">
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-100 border-b border-slate-200 text-[11px] font-bold text-slate-700">
+                      <th className="py-1 px-2 text-left">รายการ</th>
+                      <th className="py-1 px-2 text-right w-24">จำนวนเงิน</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {payReceipt.items.map((item) => (
+                      <tr key={item.id}>
+                        <td className="py-1 px-2 text-slate-900">{item.description}</td>
+                        <td className="py-1 px-2 text-right font-mono font-medium">
+                          ฿{item.amount.toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <div className="flex justify-between text-xs text-slate-500">
-                <span>ยอดค้างคงเหลือ</span>
-                <span>฿{payReceipt.remainingBalance.toLocaleString()}</span>
+            )}
+
+            {/* Totals & Signatures */}
+            <div className="grid grid-cols-2 gap-4 text-xs pt-1">
+              <div className="space-y-1 text-slate-600 text-[11px]">
+                <div>
+                  ยอดค้างคงเหลือ:{" "}
+                  <span className="font-mono font-bold text-slate-800">
+                    ฿{payReceipt.remainingBalance.toLocaleString()}
+                  </span>
+                </div>
+                <div className="pt-2 text-[10px] text-slate-400">
+                  * ขอบคุณที่ไว้วางใจใช้บริการ TheRoom Resort
+                </div>
+              </div>
+              <div className="space-y-1 text-right">
+                <div className="flex justify-between font-bold text-sm text-slate-900 border-t border-b border-slate-900 py-1">
+                  <span>ยอดรับชำระ</span>
+                  <span className="font-mono text-base text-emerald-700">
+                    ฿{payReceipt.amount.toLocaleString()}
+                  </span>
+                </div>
+                <div className="pt-3 flex justify-end text-[10px] text-slate-600 text-center">
+                  <div>
+                    <div className="w-28 border-b border-slate-400 mb-1"></div>
+                    <div>( ผู้รับเงิน / Cashier )</div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* Tear-off Guide Line (For Full A4 Paper) */}
+            <div className="hidden print:flex items-center gap-2 pt-2 text-[10px] text-slate-400 border-t border-dashed border-slate-300 mt-2">
+              <span>✂</span>
+              <span className="flex-1 border-b border-dashed border-slate-300"></span>
+              <span>รอยตัด / ฉีกครึ่งหน้า A4</span>
+              <span className="flex-1 border-b border-dashed border-slate-300"></span>
+            </div>
+
+            {/* Screen Action Buttons */}
             <div className="no-print flex gap-2 pt-2">
               <button
+                type="button"
                 onClick={() => window.print()}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg border border-slate-300 text-xs font-semibold"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer"
               >
-                <Printer className="w-4 h-4" /> พิมพ์ใบเสร็จ
+                <Printer className="w-4 h-4" /> พิมพ์บิลครึ่ง A4
               </button>
               <button
+                type="button"
                 onClick={() => setPayReceipt(null)}
-                className="flex-1 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold"
+                className="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold cursor-pointer"
               >
                 ปิด
               </button>

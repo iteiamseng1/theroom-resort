@@ -552,73 +552,75 @@ export function ReceivingClient({
         )}
       </div>
 
-      {/* Printable Goods Receipt Modal */}
+      {/* Printable Goods Receipt Modal (ครึ่ง A4) */}
       {printReceipt && (
         <div className="fixed inset-0 z-[60] bg-slate-950/60 flex items-start justify-center p-4 overflow-y-auto print-overlay">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-xl my-6 print-a4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 space-y-3 shadow-xl my-4 print-half-a4 border border-slate-200">
             <div className="flex items-center justify-between no-print border-b border-slate-100 pb-3">
               <span className="text-sm font-bold text-slate-800">ใบรับของเข้าคลัง (Goods Receipt)</span>
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => window.print()}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 text-white text-xs font-semibold hover:bg-sky-700"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 text-white text-xs font-semibold hover:bg-sky-700 cursor-pointer"
                 >
-                  <Printer className="w-4 h-4" /> สั่งพิมพ์เอกสาร
+                  <Printer className="w-4 h-4" /> สั่งพิมพ์บิลครึ่ง A4
                 </button>
                 <button
+                  type="button"
                   onClick={() => setPrintReceipt(null)}
-                  className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50"
+                  className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            <div className="space-y-4 text-slate-900">
-              <div className="flex justify-between items-start border-b-2 border-slate-900 pb-3">
-                <div className="flex items-start gap-3">
-                  <ResortLogo className="w-24 h-auto shrink-0" />
+            <div className="space-y-3 text-slate-900">
+              <div className="flex justify-between items-start border-b-2 border-slate-900 pb-2">
+                <div className="flex items-start gap-2.5">
+                  <ResortLogo className="w-16 h-auto shrink-0" />
                   <div>
-                    <h2 className="text-lg font-bold">{hotelName}</h2>
-                    <p className="text-sm font-semibold">ใบรับสินค้าเข้าคลัง / อัปเดตต้นทุน</p>
-                    <p className="text-xs text-slate-500">
+                    <h2 className="text-base font-bold leading-tight">{hotelName}</h2>
+                    <p className="text-xs font-semibold text-slate-700">ใบรับสินค้าเข้าคลัง / อัปเดตต้นทุน</p>
+                    <p className="text-[10px] text-slate-500">
                       ซัพพลายเออร์: {printReceipt.supplier || "-"}
                     </p>
                   </div>
                 </div>
-                <div className="text-right text-xs">
-                  <p className="font-mono font-bold">เลขที่: {printReceipt.receiptNo}</p>
-                  <p>วันที่: {new Date(printReceipt.createdAt).toLocaleString("th-TH")}</p>
-                  <p>ผู้รับเข้า: {printReceipt.userName}</p>
+                <div className="text-right text-[11px]">
+                  <p className="font-mono font-bold text-slate-800">เลขที่: {printReceipt.receiptNo}</p>
+                  <p className="text-slate-500">วันที่: {new Date(printReceipt.createdAt).toLocaleString("th-TH")}</p>
+                  <p className="text-slate-500">ผู้รับเข้า: {printReceipt.userName}</p>
                 </div>
               </div>
 
               <table className="w-full text-xs border-collapse border border-slate-300">
                 <thead>
-                  <tr className="bg-slate-100">
-                    <th className="border border-slate-300 px-2 py-2 text-center w-10">#</th>
-                    <th className="border border-slate-300 px-2 py-2 text-left">รายการสินค้า</th>
-                    <th className="border border-slate-300 px-2 py-2 text-center">ประเภท</th>
-                    <th className="border border-slate-300 px-2 py-2 text-right">จำนวน</th>
-                    <th className="border border-slate-300 px-2 py-2 text-right">ต้นทุน/หน่วย</th>
-                    <th className="border border-slate-300 px-2 py-2 text-right">รวมเป็นเงิน</th>
+                  <tr className="bg-slate-100 text-[11px]">
+                    <th className="border border-slate-300 px-1.5 py-1 text-center w-8">#</th>
+                    <th className="border border-slate-300 px-1.5 py-1 text-left">รายการสินค้า</th>
+                    <th className="border border-slate-300 px-1.5 py-1 text-center w-16">ประเภท</th>
+                    <th className="border border-slate-300 px-1.5 py-1 text-right w-16">จำนวน</th>
+                    <th className="border border-slate-300 px-1.5 py-1 text-right w-20">ต้นทุน/หน่วย</th>
+                    <th className="border border-slate-300 px-1.5 py-1 text-right w-24">รวมเป็นเงิน</th>
                   </tr>
                 </thead>
                 <tbody>
                   {printReceipt.lines.map((l, idx) => (
-                    <tr key={idx}>
-                      <td className="border border-slate-300 px-2 py-2 text-center">{idx + 1}</td>
-                      <td className="border border-slate-300 px-2 py-2 font-medium">{l.name}</td>
-                      <td className="border border-slate-300 px-2 py-2 text-center">
+                    <tr key={idx} className="leading-tight">
+                      <td className="border border-slate-300 px-1.5 py-1 text-center text-slate-500">{idx + 1}</td>
+                      <td className="border border-slate-300 px-1.5 py-1 font-medium">{l.name}</td>
+                      <td className="border border-slate-300 px-1.5 py-1 text-center text-[10px]">
                         {USAGE_LABEL[l.usageType]}
                       </td>
-                      <td className="border border-slate-300 px-2 py-2 text-right">
+                      <td className="border border-slate-300 px-1.5 py-1 text-right font-mono">
                         {l.quantity} {l.unit}
                       </td>
-                      <td className="border border-slate-300 px-2 py-2 text-right">
+                      <td className="border border-slate-300 px-1.5 py-1 text-right font-mono">
                         ฿{l.unitCost.toLocaleString("th-TH", { maximumFractionDigits: 2 })}
                       </td>
-                      <td className="border border-slate-300 px-2 py-2 text-right font-semibold">
+                      <td className="border border-slate-300 px-1.5 py-1 text-right font-mono font-semibold">
                         ฿{l.lineTotal.toLocaleString("th-TH", { maximumFractionDigits: 2 })}
                       </td>
                     </tr>
@@ -626,10 +628,10 @@ export function ReceivingClient({
                 </tbody>
                 <tfoot>
                   <tr className="bg-slate-50 font-bold">
-                    <td colSpan={5} className="border border-slate-300 px-2 py-2 text-right">
+                    <td colSpan={5} className="border border-slate-300 px-1.5 py-1 text-right">
                       ยอดรับเข้าคลังรวมทั้งสิ้น
                     </td>
-                    <td className="border border-slate-300 px-2 py-2 text-right">
+                    <td className="border border-slate-300 px-1.5 py-1 text-right font-mono font-bold text-emerald-800">
                       ฿{printReceipt.totalCost.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                     </td>
                   </tr>
@@ -637,18 +639,26 @@ export function ReceivingClient({
               </table>
 
               {printReceipt.notes && (
-                <p className="text-xs text-slate-600">หมายเหตุ: {printReceipt.notes}</p>
+                <p className="text-[10px] text-slate-500">หมายเหตุ: {printReceipt.notes}</p>
               )}
 
-              <div className="grid grid-cols-2 gap-8 pt-8 text-xs text-center">
-                <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-8 pt-4 text-xs text-center">
+                <div className="space-y-3">
                   <p>ลงชื่อ .......................................................</p>
-                  <p>( ผู้ส่งมอบสินค้า )</p>
+                  <p className="text-[11px] text-slate-500">( ผู้ส่งมอบสินค้า )</p>
                 </div>
-                <div className="space-y-6">
+                <div className="space-y-3">
                   <p>ลงชื่อ .......................................................</p>
-                  <p>( ผู้ตรวจรับ / ผู้บันทึก )</p>
+                  <p className="text-[11px] text-slate-500">( ผู้ตรวจรับ / ผู้บันทึก )</p>
                 </div>
+              </div>
+
+              {/* Tear-off Guide Line (For Full A4 Paper) */}
+              <div className="hidden print:flex items-center gap-2 pt-2 text-[10px] text-slate-400 border-t border-dashed border-slate-300 mt-2">
+                <span>✂</span>
+                <span className="flex-1 border-b border-dashed border-slate-300"></span>
+                <span>รอยตัด / ฉีกครึ่งหน้า A4</span>
+                <span className="flex-1 border-b border-dashed border-slate-300"></span>
               </div>
             </div>
           </div>
