@@ -197,7 +197,6 @@ export function FrontDeskClient({
       const gData = await gRes.json();
       setGuests(gData.guests || []);
     }
-    router.refresh();
   }
 
   function openNewBookingForRoom(room: RoomItem) {

@@ -204,6 +204,36 @@ export function StockClient({
 
   async function handleSaveProduct(e: React.FormEvent) {
     e.preventDefault();
+    const isEdit = Boolean(editingItem);
+    const optimisticKey = editingItem?.key || `temp-${Date.now()}`;
+    const optimisticItem: UnifiedStockItem = {
+      key: optimisticKey,
+      usageType: form.usageType,
+      menuItemId: editingItem?.menuItemId ?? null,
+      supplyItemId: editingItem?.supplyItemId ?? null,
+      name: form.name,
+      sku: form.sku,
+      barcode: form.barcode,
+      cost: Number(form.cost || 0),
+      price: Number(form.price || 0),
+      stockQty: Number(form.stockQty || 0),
+      minStock: Number(form.minStock || 5),
+      trackStock: form.trackStock,
+      unit: form.unit,
+      menuCategoryId: form.menuCategoryId,
+      menuCategoryName: menuCategories.find((c) => c.id === form.menuCategoryId)?.name || "",
+      supplyCategory: form.supplyCategory,
+      isMinibar: form.isMinibar,
+    };
+
+    // Instant UI update (0ms feedback)
+    if (isEdit) {
+      setItems((prev) => prev.map((item) => (item.key === editingItem!.key ? optimisticItem : item)));
+    } else {
+      setItems((prev) => [optimisticItem, ...prev]);
+    }
+    setShowForm(false);
+
     setLoading(true);
     try {
       const res = await fetch("/api/stock", {
@@ -231,10 +261,13 @@ export function StockClient({
       const data = await res.json();
       if (!res.ok) {
         alert(data.error || "บันทึกไม่สำเร็จ");
+        setShowForm(true);
         return;
       }
       syncPayload(data);
-      setShowForm(false);
+    } catch {
+      alert("บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+      setShowForm(true);
     } finally {
       setLoading(false);
     }
@@ -326,6 +359,18 @@ export function StockClient({
   async function handleAdjustStock(e: React.FormEvent) {
     e.preventDefault();
     if (!adjustTarget) return;
+    const targetKey = adjustTarget.key;
+    const newQty = Number(adjustQty || 0);
+
+    // Instant UI update (0ms feedback)
+    setItems((prev) =>
+      prev.map((item) =>
+        item.key === targetKey ? { ...item, stockQty: newQty } : item
+      )
+    );
+    const savedTarget = adjustTarget;
+    setAdjustTarget(null);
+
     setLoading(true);
     try {
       const res = await fetch("/api/stock", {
@@ -333,15 +378,14 @@ export function StockClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "ADJUST_STOCK",
-          menuItemId: adjustTarget.menuItemId,
-          supplyItemId: adjustTarget.supplyItemId,
-          newStockQty: Number(adjustQty || 0),
+          menuItemId: savedTarget.menuItemId,
+          supplyItemId: savedTarget.supplyItemId,
+          newStockQty: newQty,
         }),
       });
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && data.items) {
         setItems(data.items);
-        setAdjustTarget(null);
       }
     } finally {
       setLoading(false);
@@ -350,17 +394,25 @@ export function StockClient({
 
   async function handleDelete(item: UnifiedStockItem) {
     if (!confirm(`ลบรายการ "${item.name}" ออกจากระบบ?`)) return;
-    const res = await fetch("/api/stock", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "DEACTIVATE",
-        menuItemId: item.menuItemId,
-        supplyItemId: item.supplyItemId,
-      }),
-    });
-    const data = await res.json();
-    if (res.ok) setItems(data.items);
+
+    // Instant UI update (0ms feedback)
+    setItems((prev) => prev.filter((i) => i.key !== item.key));
+
+    try {
+      const res = await fetch("/api/stock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "DEACTIVATE",
+          menuItemId: item.menuItemId,
+          supplyItemId: item.supplyItemId,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.items) setItems(data.items);
+    } catch {
+      // ignore
+    }
   }
 
   const parsedCost = Number(form.cost || 0);

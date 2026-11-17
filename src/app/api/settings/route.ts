@@ -62,6 +62,6 @@ export async function PUT(req: NextRequest) {
   });
 
   invalidateHotelNameCache();
-  revalidatePath("/", "layout");
+  revalidatePath("/settings");
   return NextResponse.json({ setting: updated });
 }
