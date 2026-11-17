@@ -16,22 +16,21 @@ export default async function BillingPage({
   ], "/billing");
   const params = await searchParams;
 
-  const [folios, setting] = await Promise.all([
-    prisma.folio.findMany({
-      include: {
-        stay: {
-          include: {
-            room: true,
-            guest: true,
-          },
+  const folios = await prisma.folio.findMany({
+    include: {
+      stay: {
+        include: {
+          room: true,
+          guest: true,
         },
-        items: { orderBy: { createdAt: "asc" } },
-        payments: { orderBy: { paidAt: "desc" } },
       },
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.propertySetting.findUnique({ where: { id: 1 } }),
-  ]);
+      items: { orderBy: { createdAt: "asc" } },
+      payments: { orderBy: { paidAt: "desc" } },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 100,
+  });
+  const setting = await prisma.propertySetting.findUnique({ where: { id: 1 } });
 
   const serialized = folios.map((f) => ({
     ...f,

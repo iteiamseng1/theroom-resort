@@ -14,22 +14,20 @@ export default async function MetersPage() {
 
   const currentMonth = new Date().toISOString().slice(0, 7);
 
-  const [rooms, readings, setting] = await Promise.all([
-    prisma.room.findMany({
-      include: {
-        stays: {
-          where: { status: "CHECKED_IN" },
-          include: { guest: true, folio: true },
-          take: 1,
-        },
+  const rooms = await prisma.room.findMany({
+    include: {
+      stays: {
+        where: { status: "CHECKED_IN" },
+        include: { guest: true, folio: true },
+        take: 1,
       },
-      orderBy: { roomNumber: "asc" },
-    }),
-    prisma.utilityMeter.findMany({
-      where: { billingMonth: currentMonth },
-    }),
-    prisma.propertySetting.findUnique({ where: { id: 1 } }),
-  ]);
+    },
+    orderBy: { roomNumber: "asc" },
+  });
+  const readings = await prisma.utilityMeter.findMany({
+    where: { billingMonth: currentMonth },
+  });
+  const setting = await prisma.propertySetting.findUnique({ where: { id: 1 } });
 
   return (
     <AppShell user={user} hotelName={hotelName}>

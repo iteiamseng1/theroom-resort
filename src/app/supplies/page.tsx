@@ -11,21 +11,19 @@ export default async function SuppliesPage() {
     "HOUSEKEEPING",
   ], "/supplies");
 
-  const [items, movements, rooms] = await Promise.all([
-    prisma.supplyItem.findMany({
-      where: { active: true },
-      orderBy: [{ category: "asc" }, { name: "asc" }],
-    }),
-    prisma.supplyMovement.findMany({
-      include: { supplyItem: true },
-      orderBy: { createdAt: "desc" },
-      take: 40,
-    }),
-    prisma.room.findMany({
-      select: { roomNumber: true },
-      orderBy: { roomNumber: "asc" },
-    }),
-  ]);
+  const items = await prisma.supplyItem.findMany({
+    where: { active: true },
+    orderBy: [{ category: "asc" }, { name: "asc" }],
+  });
+  const movements = await prisma.supplyMovement.findMany({
+    include: { supplyItem: true },
+    orderBy: { createdAt: "desc" },
+    take: 40,
+  });
+  const rooms = await prisma.room.findMany({
+    select: { roomNumber: true },
+    orderBy: { roomNumber: "asc" },
+  });
 
   const serializedMovements = movements.map((m) => ({
     ...m,

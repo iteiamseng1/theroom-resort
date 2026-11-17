@@ -33,7 +33,18 @@ const DEFAULT_SUPPLY_CATEGORIES = [
   "เครื่องดื่ม/มินิบาร์",
 ];
 
-export async function buildUnifiedStockPayload() {
+let cachedUnifiedStock: { data: { items: UnifiedStockItem[]; menuCategories: any[]; stockCategories: any[] }; timestamp: number } | null = null;
+const STOCK_CACHE_TTL = 15 * 1000; // 15 seconds cache
+
+export function invalidateStockCache() {
+  cachedUnifiedStock = null;
+}
+
+export async function buildUnifiedStockPayload(forceFresh = false) {
+  const now = Date.now();
+  if (!forceFresh && cachedUnifiedStock && now - cachedUnifiedStock.timestamp < STOCK_CACHE_TTL) {
+    return cachedUnifiedStock.data;
+  }
   const existingCatCount = await prisma.stockCategory.count();
   if (existingCatCount === 0) {
     const supplyCatsInItems = await prisma.supplyItem.findMany({
@@ -58,23 +69,21 @@ export async function buildUnifiedStockPayload() {
     );
   }
 
-  const [menuItems, supplyItems, menuCategories, stockCategories] = await Promise.all([
-    prisma.menuItem.findMany({
-      where: { active: true },
-      include: { category: true, supplyItem: true },
-      orderBy: [{ category: { sortOrder: "asc" } }, { name: "asc" }],
-    }),
-    prisma.supplyItem.findMany({
-      where: { active: true },
-      orderBy: [{ category: "asc" }, { name: "asc" }],
-    }),
-    prisma.menuCategory.findMany({
-      orderBy: { sortOrder: "asc" },
-    }),
-    prisma.stockCategory.findMany({
-      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    }),
-  ]);
+  const menuItems = await prisma.menuItem.findMany({
+    where: { active: true },
+    include: { category: true, supplyItem: true },
+    orderBy: [{ category: { sortOrder: "asc" } }, { name: "asc" }],
+  });
+  const supplyItems = await prisma.supplyItem.findMany({
+    where: { active: true },
+    orderBy: [{ category: "asc" }, { name: "asc" }],
+  });
+  const menuCategories = await prisma.menuCategory.findMany({
+    orderBy: { sortOrder: "asc" },
+  });
+  const stockCategories = await prisma.stockCategory.findMany({
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+  });
 
   const linkedSupplyIds = new Set<string>();
   const unified: UnifiedStockItem[] = [];
@@ -127,7 +136,9 @@ export async function buildUnifiedStockPayload() {
     });
   }
 
-  return { items: unified, menuCategories, stockCategories };
+  const result = { items: unified, menuCategories, stockCategories };
+  cachedUnifiedStock = { data: result, timestamp: now };
+  return result;
 }
 
 export interface ReceivingHistoryRecord {
@@ -192,6 +203,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  invalidateStockCache();
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

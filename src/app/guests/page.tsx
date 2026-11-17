@@ -5,29 +5,28 @@ import { requireSession } from "@/lib/require-session";
 
 export default async function GuestsPage() {
   const { user, hotelName } = await requireSession(["OWNER", "MANAGER", "FRONT_DESK"], "/guests");
-  const [guests, setting] = await Promise.all([
-    prisma.guest.findMany({
-      include: {
-        stays: {
-          include: {
-            room: true,
-            folio: {
-              select: {
-                id: true,
-                status: true,
-                balance: true,
-                totalCharges: true,
-                totalPayments: true,
-              },
+  const guests = await prisma.guest.findMany({
+    include: {
+      stays: {
+        include: {
+          room: true,
+          folio: {
+            select: {
+              id: true,
+              status: true,
+              balance: true,
+              totalCharges: true,
+              totalPayments: true,
             },
           },
-          orderBy: { checkInDate: "desc" },
         },
+        orderBy: { checkInDate: "desc" },
       },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.propertySetting.findUnique({ where: { id: 1 } }),
-  ]);
+    },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+  });
+  const setting = await prisma.propertySetting.findUnique({ where: { id: 1 } });
 
   const serializedGuests = guests.map((g) => ({
     ...g,

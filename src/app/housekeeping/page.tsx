@@ -11,13 +11,12 @@ export default async function HousekeepingPage() {
     "HOUSEKEEPING",
   ], "/housekeeping");
 
-  const [tasks, rooms] = await Promise.all([
-    prisma.housekeepingTask.findMany({
-      include: { room: true },
-      orderBy: [{ status: "desc" }, { createdAt: "desc" }],
-    }),
-    prisma.room.findMany({ orderBy: { roomNumber: "asc" } }),
-  ]);
+  const tasks = await prisma.housekeepingTask.findMany({
+    include: { room: true },
+    orderBy: [{ status: "desc" }, { createdAt: "desc" }],
+    take: 100,
+  });
+  const rooms = await prisma.room.findMany({ orderBy: { roomNumber: "asc" } });
 
   const serialized = tasks.map((t) => ({
     ...t,

@@ -219,6 +219,7 @@ export function AppShell({
                     <Link
                       key={item.href}
                       href={item.href}
+                      prefetch={false}
                       title={!sidebarExpanded ? item.label : undefined}
                       className={`flex items-center rounded-lg text-sm font-medium transition ${
                         sidebarExpanded ? "gap-3 px-3 py-2" : "justify-center px-0 py-2.5"
@@ -307,7 +308,7 @@ export function AppShell({
             </button>
           )}
           {visibleNav.some((n) => n.href === "/settings") && (
-            <Link href="/settings" className="p-2 rounded-lg hover:bg-[#432313] text-[#EADFCF]">
+            <Link href="/settings" prefetch={false} className="p-2 rounded-lg hover:bg-[#432313] text-[#EADFCF]">
               <Settings className="w-4 h-4" />
             </Link>
           )}
@@ -336,6 +337,7 @@ export function AppShell({
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false}
               className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] font-medium min-w-[56px] ${
                 active ? "text-[#9E731A] font-bold" : "text-[#6E5644]"
               }`}

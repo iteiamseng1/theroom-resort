@@ -6,6 +6,20 @@ import { prisma } from "./prisma";
 let cachedHotelName: { name: string; timestamp: number } | null = null;
 const CACHE_TTL_MS = 60 * 1000; // 60s cache to avoid querying propertySetting on every page load
 
+interface CachedDbUser {
+  role: string;
+  active: boolean;
+  allowedMenus: string;
+  name: string;
+}
+
+const userCache = new Map<string, { user: CachedDbUser; timestamp: number }>();
+
+export function invalidateUserCache(userId?: string) {
+  if (userId) userCache.delete(userId);
+  else userCache.clear();
+}
+
 export function invalidateHotelNameCache() {
   cachedHotelName = null;
 }
@@ -28,6 +42,26 @@ async function getCachedHotelName(): Promise<string> {
   }
 }
 
+async function getCachedDbUser(id: string): Promise<CachedDbUser | null> {
+  const now = Date.now();
+  const cached = userCache.get(id);
+  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    return cached.user;
+  }
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { role: true, active: true, allowedMenus: true, name: true },
+    });
+    if (user) {
+      userCache.set(id, { user, timestamp: now });
+    }
+    return user;
+  } catch {
+    return cached ? cached.user : null;
+  }
+}
+
 export async function requireSession(
   allowedRoles?: UserRole[],
   requiredPath?: string
@@ -41,10 +75,7 @@ export async function requireSession(
   }
 
   const [dbUser, hotelName] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: sessionUser.id },
-      select: { role: true, active: true, allowedMenus: true, name: true },
-    }),
+    getCachedDbUser(sessionUser.id),
     getCachedHotelName(),
   ]);
 
