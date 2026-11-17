@@ -282,20 +282,14 @@ export function AppShell({
         </div>
       </aside>
 
-      {/* iOS Top Status Bar Solid Fill (eliminates any WebKit PWA glass blur) */}
-      <div
-        className="no-print md:hidden fixed top-0 inset-x-0 h-[max(2.75rem,env(safe-area-inset-top))] bg-[#2D160B] z-[60] pointer-events-none"
-        aria-hidden="true"
-      />
-
-      {/* Mobile Top Header */}
-      <header className="no-print md:hidden sticky top-0 z-50 w-full bg-[#2D160B] text-[#FAF5EE] border-b border-[#C89B35]/25 pt-[calc(max(2.75rem,env(safe-area-inset-top))+12px)] pb-3 px-4">
-        <div className="flex items-center justify-between">
+      {/* Mobile Top Header (Full iOS Safe Area support, sticky, solid background) */}
+      <header className="no-print md:hidden mobile-pwa-header text-[#FAF5EE] shadow-md">
+        <div className="pt-2 pb-3 px-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <img
               src="/logo-theroom.svg"
               alt="The Room Resort"
-              className="w-11 h-auto rounded-md shrink-0"
+              className="w-11 h-auto rounded-md shrink-0 drop-shadow-sm"
             />
             <div className="min-w-0">
               <div className="text-sm font-bold truncate text-[#F6DC93] leading-tight">
@@ -317,7 +311,7 @@ export function AppShell({
               </button>
             )}
             {visibleNav.some((n) => n.href === "/settings") && (
-              <Link href="/settings" prefetch={false} className="p-2 rounded-lg hover:bg-[#432313] text-[#EADFCF]">
+              <Link href="/settings" prefetch={false} className="p-2 rounded-lg hover:bg-[#432313] text-[#EADFCF]" title="ตั้งค่าระบบ">
                 <Settings className="w-4 h-4" />
               </Link>
             )}

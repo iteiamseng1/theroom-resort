@@ -9,6 +9,18 @@ html,
 body {
   background-color: #2D160B;
   color: #2C1810;
+  overscroll-behavior-y: none;
+}
+
+.mobile-pwa-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  background-color: #2D160B;
+  /* Support iOS Safe Area: pushes content below the notch / Dynamic Island */
+  padding-top: max(44px, env(safe-area-inset-top, 44px));
+  border-bottom: 1px solid rgba(200, 155, 53, 0.25);
 }
 
 @page {
