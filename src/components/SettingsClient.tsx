@@ -99,14 +99,14 @@ export function SettingsClient({
   // New Room Form
   const [newRoomNumber, setNewRoomNumber] = useState("");
   const [newFloor, setNewFloor] = useState(1);
-  const [newZone, setNewZone] = useState("Building A");
+  const [newZone, setNewZone] = useState("-");
   const [newRoomTypeId, setNewRoomTypeId] = useState(initialRoomTypes[0]?.id ?? "");
 
   // New Room Type Form
   const [rtCode, setRtCode] = useState("");
   const [rtName, setRtName] = useState("");
-  const [rtDaily, setRtDaily] = useState(1000);
-  const [rtMonthly, setRtMonthly] = useState(7500);
+  const [rtDaily, setRtDaily] = useState(450);
+  const [rtMonthly, setRtMonthly] = useState(13500);
 
   // Edit Room Type State
   const [editingRt, setEditingRt] = useState<RoomTypeData | null>(null);
@@ -332,7 +332,7 @@ export function SettingsClient({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg sm:text-2xl font-bold text-slate-900">ตั้งค่าระบบโรงแรม</h1>
+        <h1 className="text-lg sm:text-2xl font-bold text-slate-900">ตั้งค่าระบบ</h1>
         <p className="hidden sm:block text-sm text-slate-500">
           จัดการข้อมูลโรงแรม ภาษี ประเภทห้อง และหมายเลขห้องพัก
         </p>

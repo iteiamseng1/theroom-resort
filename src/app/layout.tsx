@@ -41,15 +41,16 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="th"
-      className={`${geistSans.variable} ${geistMono.variable} ${notoThai.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${notoThai.variable} h-full bg-[#2D160B] antialiased`}
     >
-      <body className="min-h-full bg-slate-50 text-slate-900 font-sans">
+      <body className="min-h-full bg-[#2D160B] text-slate-900 font-sans">
         <ServiceWorkerRegistrar />
         {children}
       </body>

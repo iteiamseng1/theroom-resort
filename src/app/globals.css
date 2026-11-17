@@ -5,8 +5,9 @@
   --font-mono: var(--font-geist-mono), monospace;
 }
 
+html,
 body {
-  background-color: #FAF6EE;
+  background-color: #2D160B;
   color: #2C1810;
 }
 

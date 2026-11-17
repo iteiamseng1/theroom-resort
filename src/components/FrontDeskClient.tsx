@@ -545,7 +545,7 @@ export function FrontDeskClient({
         <div>
           <h1 className="text-lg sm:text-2xl font-bold text-slate-900">หน้าฟรอนต์ &amp; ผังห้องพัก</h1>
           <p className="hidden sm:block text-sm text-slate-500">
-            คลิกที่ห้องเพื่อรับ Walk-in จองล่วงหน้า Check-in / Check-out หรือย้ายห้อง
+            คลิกที่ห้องเพื่อรับ Check-in / Check-out หรือย้ายห้อง
           </p>
         </div>
 

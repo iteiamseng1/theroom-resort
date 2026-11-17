@@ -93,7 +93,7 @@ export function HousekeepingClient({
         <div>
           <h1 className="text-lg sm:text-2xl font-bold text-slate-900">แม่บ้าน &amp; ซ่อมบำรุง</h1>
           <p className="hidden sm:block text-sm text-slate-500">
-            กดอัปเดตสถานะทำความสะอาดจากมือถือได้ทันที (เมื่อเสร็จสิ้น ห้องจะเปลี่ยนเป็น VC อัตโนมัติ)
+            อัปเดตสถานะทำความสะอาดจากมือถือได้ทันที
           </p>
         </div>
 

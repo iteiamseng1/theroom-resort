@@ -88,7 +88,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D160B] flex items-center justify-center p-4">
+    <div className="relative min-h-screen w-full bg-[#2D160B] flex items-center justify-center p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="fixed inset-0 bg-[#2D160B] -z-10" aria-hidden="true" />
       <div className="w-full max-w-md bg-[#FAF6EE] border border-[#C89B35]/40 rounded-2xl shadow-2xl overflow-hidden">
         <div className="bg-[#2D160B] text-[#FAF5EE] px-6 py-6 flex flex-col items-center text-center gap-3 border-b border-[#C89B35]/30">
           <ResortLogo className="w-44 h-auto drop-shadow-md" />

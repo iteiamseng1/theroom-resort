@@ -424,9 +424,9 @@ export function StockClient({
       <div className={`space-y-3 sm:space-y-6 ${showPrintSheet ? "no-print" : ""}`}>
         <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
           <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-slate-900">คลังสินค้า &amp; สต๊อกรวม</h1>
+            <h1 className="text-lg sm:text-2xl font-bold text-slate-900">คลังสินค้า</h1>
             <p className="hidden sm:block text-sm text-slate-500">
-              เพิ่มสินค้าจากเมนูเดียวกัน แยกประเภท ขาย (POS) / เบิกใช้ (Supplies) พร้อมราคาทุน และพิมพ์ใบตรวจนับสต๊อก
+              เพิ่มข้อมูลสินค้า แยกประเภท ขาย (POS) / เบิกใช้  พร้อมราคาทุน และพิมพ์ใบตรวจนับสต๊อก
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">

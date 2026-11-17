@@ -213,9 +213,9 @@ export function GuestsClient({
     <div className={`space-y-3 sm:space-y-5 ${invoiceGuest ? "no-print" : ""}`}>
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="text-lg sm:text-2xl font-bold text-slate-900">ฐานข้อมูลลูกค้า</h1>
+          <h1 className="text-lg sm:text-2xl font-bold text-slate-900">ข้อมูลลูกค้า</h1>
           <p className="hidden sm:block text-sm text-slate-500">
-            ทะเบียนผู้เข้าพัก รายชื่อ VIP / Blacklist และประวัติการเข้าพัก
+            ข้อมูลลูกค้าและประวัติการเข้าพัก
           </p>
         </div>
         <button

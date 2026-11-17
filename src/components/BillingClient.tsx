@@ -185,7 +185,7 @@ export function BillingClient({
         <div>
           <h1 className="text-lg sm:text-2xl font-bold text-slate-900">รับชำระ</h1>
           <p className="hidden sm:block text-sm text-slate-500">
-            ตรวจสอบยอดค้างชำระ เพิ่มค่าใช้จ่าย รับชำระเงิน และพิมพ์ใบเสร็จ/ใบกำกับภาษี
+            ตรวจสอบยอดค้างชำระ และพิมพ์ใบเสร็จ/ใบกำกับภาษี
           </p>
         </div>
         {selected && (
@@ -586,7 +586,7 @@ export function BillingClient({
                       checked={applyTax}
                       onChange={(e) => setApplyTax(e.target.checked)}
                     />
-                    บวก VAT / Service Charge ตามตั้งค่า
+                    บวก VAT / Service Charge
                   </label>
                   <button
                     type="submit"

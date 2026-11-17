@@ -460,11 +460,10 @@ export function PosClient({
       <div className="no-print flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
         <div>
           <h1 className="text-lg sm:text-2xl font-bold text-slate-900">
-            มินิมาร์ท &amp; จุดขาย POS
+            ขายPOS
           </h1>
           <p className="hidden sm:block text-sm text-slate-500">
-            ยิงบาร์โค้ดขายหน้าร้าน ทอนเงินด่วน หรือโยนยอดเข้าห้องพัก
-          </p>
+                     </p>
         </div>
 
         <div className="flex gap-1.5 bg-white p-1 rounded-xl border border-slate-200">

@@ -192,7 +192,7 @@ export function ReceivingClient({
           <div>
             <h1 className="text-lg sm:text-2xl font-bold text-slate-900">รับของเข้าคลัง</h1>
             <p className="hidden sm:block text-sm text-slate-500">
-              ยิงบาร์โค้ดหรือแตะเลือกสินค้าได้ทุกตัว ปรับต้นทุนใหม่แล้วกดรับเข้า ระบบอัปเดตทุนในสินค้าทันที
+              เลือกสินค้า ปรับต้นทุนใหม่ แล้วกดรับเข้า ระบบอัปเดตทุน
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -448,7 +448,7 @@ export function ReceivingClient({
                 {submitting ? "กำลังบันทึก..." : "ยืนยันรับของเข้า & อัปเดตต้นทุน"}
               </button>
               <p className="text-[11px] text-slate-400 text-center">
-                อัปเดตสต๊อกและราคาต้นทุนในสินค้าทันที พร้อมพิมพ์ใบรับของ
+                อัปเดตสต๊อกและราคาต้นทุนในสินค้าทันที
               </p>
             </div>
           </div>

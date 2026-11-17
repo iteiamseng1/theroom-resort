@@ -341,7 +341,7 @@ export function SuppliesClient({
           <div>
             <h1 className="text-lg sm:text-2xl font-bold text-slate-900">เบิกของใช้</h1>
             <p className="hidden sm:block text-sm text-slate-500">
-              ยิงบาร์โค้ดหรือแตะเลือกของใช้ลงตะกร้า ตัดสต็อกและพิมพ์ใบเบิกได้ทันที
+              เลือกของใช้ลงตะกร้า และพิมพ์ใบเบิก
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">

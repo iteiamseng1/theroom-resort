@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "ระบบบริหารจัดการโรงแรม ที่พักรายเดือน ห้องอาหาร POS และแม่บ้าน",
     start_url: "/",
     display: "standalone",
-    background_color: "#FAF5EE",
+    background_color: "#2D160B",
     theme_color: "#2D160B",
     orientation: "any",
     icons: [
