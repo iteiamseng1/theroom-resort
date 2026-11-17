@@ -283,12 +283,12 @@ export function AppShell({
       </aside>
 
       {/* Mobile Top Header */}
-      <header className="no-print md:hidden sticky top-0 z-30 bg-[#2D160B] text-[#FAF5EE] border-b border-[#C89B35]/25 px-4 py-2.5 flex items-center justify-between shadow-sm">
+      <header className="no-print md:hidden sticky top-0 z-50 w-full bg-[#2D160B] text-[#FAF5EE] border-b border-[#C89B35]/25 px-4 pt-[max(0.625rem,calc(env(safe-area-inset-top)+0.5rem))] pb-2.5 flex items-center justify-between shadow-md">
         <div className="flex items-center gap-2.5 min-w-0">
           <img
             src="/logo-theroom.svg"
             alt="The Room Resort"
-            className="w-12 h-auto rounded-md shrink-0"
+            className="w-12 h-auto rounded-md shrink-0 drop-shadow-sm"
           />
           <div className="min-w-0">
             <div className="text-sm font-bold truncate text-[#F6DC93]">{hotelName}</div>
@@ -323,12 +323,12 @@ export function AppShell({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 md:pl-16 pb-20 md:pb-8">
+      <main className="flex-1 md:pl-16 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-8">
         <div className="max-w-[1600px] mx-auto p-2.5 sm:p-4 md:p-6">{children}</div>
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="no-print md:hidden fixed bottom-0 inset-x-0 z-30 bg-[#FAF6EE] border-t border-[#E6D9C2] flex justify-around py-1.5 px-1">
+      <nav className="no-print md:hidden fixed bottom-0 inset-x-0 z-40 bg-[#FAF6EE] border-t border-[#E6D9C2] flex justify-around pt-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] px-1">
         {mobileNav.map((item) => {
           const active =
             item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
