@@ -58,15 +58,14 @@ export async function buildUnifiedStockPayload(forceFresh = false) {
         ...supplyCatsInItems.map((s) => s.category.trim()).filter(Boolean),
       ])
     );
-    await Promise.all(
-      merged.map((name, idx) =>
-        prisma.stockCategory.upsert({
-          where: { name },
-          update: {},
-          create: { name, sortOrder: idx + 1 },
-        })
-      )
-    );
+    for (let idx = 0; idx < merged.length; idx++) {
+      const name = merged[idx];
+      await prisma.stockCategory.upsert({
+        where: { name },
+        update: {},
+        create: { name, sortOrder: idx + 1 },
+      });
+    }
   }
 
   const menuItems = await prisma.menuItem.findMany({
@@ -529,10 +528,8 @@ export async function POST(req: NextRequest) {
       });
     });
 
-    const [payload, history] = await Promise.all([
-      buildUnifiedStockPayload(),
-      getReceivingHistory(),
-    ]);
+    const payload = await buildUnifiedStockPayload();
+    const history = await getReceivingHistory();
     return NextResponse.json({
       ...payload,
       history,

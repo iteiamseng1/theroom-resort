@@ -221,7 +221,7 @@ export function StockClient({
       trackStock: form.trackStock,
       unit: form.unit,
       menuCategoryId: form.menuCategoryId,
-      menuCategoryName: menuCategories.find((c) => c.id === form.menuCategoryId)?.name || "",
+      menuCategoryName: menuCats.find((c) => c.id === form.menuCategoryId)?.name || "",
       supplyCategory: form.supplyCategory,
       isMinibar: form.isMinibar,
     };

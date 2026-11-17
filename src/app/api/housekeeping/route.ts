@@ -7,13 +7,11 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const [tasks, rooms] = await Promise.all([
-    prisma.housekeepingTask.findMany({
-      include: { room: true, assignedTo: true },
-      orderBy: [{ status: "desc" }, { createdAt: "desc" }],
-    }),
-    prisma.room.findMany({ orderBy: { roomNumber: "asc" } }),
-  ]);
+  const tasks = await prisma.housekeepingTask.findMany({
+    include: { room: true, assignedTo: true },
+    orderBy: [{ status: "desc" }, { createdAt: "desc" }],
+  });
+  const rooms = await prisma.room.findMany({ orderBy: { roomNumber: "asc" } });
 
   return NextResponse.json({ tasks, rooms });
 }

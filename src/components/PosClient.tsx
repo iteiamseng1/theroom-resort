@@ -8,6 +8,7 @@ import {
   BedDouble,
   Check,
   CreditCard,
+  Loader2,
   Minus,
   Package,
   Pencil,
@@ -233,7 +234,7 @@ export function PosClient({
   const changeAmount = paymentMethod === "CASH" ? Math.max(0, Number((cashNum - grandTotal).toFixed(2))) : 0;
 
   async function submitOrder(settleNow: "PAY_DIRECT" | "CHARGE_TO_ROOM") {
-    if (cart.length === 0) return;
+    if (cart.length === 0 || submitting) return;
     if (settleNow === "CHARGE_TO_ROOM" && !stayId) {
       alert("กรุณาเลือกห้องพักที่ต้องการโยนยอดเข้าบิล");
       return;
@@ -266,15 +267,33 @@ export function PosClient({
           change: settleNow === "CHARGE_TO_ROOM" ? 0 : changeAmount,
           paidAt: new Date().toLocaleString("th-TH"),
         });
+
+        // Optimistically deduct stock in local state immediately
+        const cartMap = new Map(cart.map((c) => [c.item.id, c.qty]));
+        setCategories((prev) =>
+          prev.map((cat) => ({
+            ...cat,
+            items: cat.items.map((item) => {
+              const qty = cartMap.get(item.id);
+              if (qty && item.trackStock) {
+                return { ...item, stockQty: Math.max(0, item.stockQty - qty) };
+              }
+              return item;
+            }),
+          }))
+        );
+
         setCart([]);
         setCashReceived("");
         setScanAlert("");
-        await refreshAll();
+        void refreshAll();
         scanInputRef.current?.focus();
       } else {
         const err = await res.json();
         alert(err.error || "บันทึกออเดอร์ไม่สำเร็จ");
       }
+    } catch {
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setSubmitting(false);
     }
@@ -742,11 +761,22 @@ export function PosClient({
             {/* Action Buttons */}
             <div className="space-y-2">
               <button
+                type="button"
                 disabled={submitting || cart.length === 0}
                 onClick={() => submitOrder("PAY_DIRECT")}
-                className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-sm disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-sm font-bold shadow-sm disabled:opacity-50 transition cursor-pointer disabled:cursor-not-allowed"
               >
-                <CreditCard className="w-4 h-4" /> คิดเงิน &amp; ออกสลิป (฿{grandTotal.toLocaleString()})
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    กำลังคิดเงิน &amp; ออกสลิป...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-4 h-4" />
+                    คิดเงิน &amp; ออกสลิป (฿{grandTotal.toLocaleString()})
+                  </>
+                )}
               </button>
             </div>
           </div>

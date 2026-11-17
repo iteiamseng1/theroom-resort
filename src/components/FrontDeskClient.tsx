@@ -13,6 +13,7 @@ import {
   ClipboardCheck,
   Clock,
   CreditCard,
+  Loader2,
   LogOut,
   Plus,
   Printer,
@@ -170,6 +171,7 @@ export function FrontDeskClient({
   const [payAmount, setPayAmount] = useState<number>(0);
   const [payMethod, setPayMethod] = useState<string>("CASH");
   const [payRef, setPayRef] = useState<string>("");
+  const [isPaying, setIsPaying] = useState(false);
   const [payReceipt, setPayReceipt] = useState<{
     bookingCode: string;
     roomNumber: string;
@@ -184,7 +186,7 @@ export function FrontDeskClient({
   } | null>(null);
 
   async function refreshRooms() {
-    const [res, gRes] = await Promise.all([fetch("/api/rooms"), fetch("/api/guests")]);
+    const res = await fetch("/api/rooms");
     if (res.ok) {
       const data = await res.json();
       setRooms(data.rooms);
@@ -193,6 +195,7 @@ export function FrontDeskClient({
         setSelectedRoom(updated || null);
       }
     }
+    const gRes = await fetch("/api/guests");
     if (gRes.ok) {
       const gData = await gRes.json();
       setGuests(gData.guests || []);
@@ -373,7 +376,8 @@ export function FrontDeskClient({
     }
   }
 
-  function startCheckOut(stay: RoomItem["stays"][number]) {
+  async function startCheckOut(stay: RoomItem["stays"][number]) {
+    if (checkingOut) return;
     if ((stay.keyDeposit ?? 0) > 0 && stay.keyDepositStatus === "HELD") {
       setCheckoutStay(stay);
       setRefundMode("RETURN");
@@ -381,7 +385,12 @@ export function FrontDeskClient({
       setRefundMethod(stay.keyDepositMethod === "TRANSFER" ? "TRANSFER" : "CASH");
       return;
     }
-    void handleStayAction(stay.id, "CHECK_OUT");
+    setCheckingOut(true);
+    try {
+      await handleStayAction(stay.id, "CHECK_OUT");
+    } finally {
+      setCheckingOut(false);
+    }
   }
 
   async function confirmCheckOutWithRefund(e: React.FormEvent) {
@@ -447,40 +456,49 @@ export function FrontDeskClient({
     roomNumber: string
   ) {
     e.preventDefault();
-    if (!stay.folio) return;
+    if (!stay.folio || isPaying) return;
     const amt = payAmount > 0 ? payAmount : stay.folio.balance;
-    const res = await fetch("/api/folios", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "RECORD_PAYMENT",
-        folioId: stay.folio.id,
-        amount: amt,
-        method: payMethod,
-        referenceNo: payRef,
-        source: "FRONT_DESK",
-      }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setPayReceipt({
-        bookingCode: stay.bookingCode,
-        roomNumber,
-        guestName: stay.guest.fullName,
-        guestTaxId: stay.guest.idNumber || undefined,
-        amount: amt,
-        method: payMethod,
-        referenceNo: payRef,
-        remainingBalance: data.folio.balance,
-        paidAt: new Date().toLocaleString("th-TH"),
-        items: Array.isArray(data.folio.items) ? data.folio.items : [],
+    if (amt <= 0) return;
+
+    setIsPaying(true);
+    try {
+      const res = await fetch("/api/folios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "RECORD_PAYMENT",
+          folioId: stay.folio.id,
+          amount: amt,
+          method: payMethod,
+          referenceNo: payRef,
+          source: "FRONT_DESK",
+        }),
       });
-      setPayStayId(null);
-      setPayRef("");
-      await refreshRooms();
-    } else {
-      const err = await res.json();
-      alert(err.error || "ชำระเงินไม่สำเร็จ");
+      if (res.ok) {
+        const data = await res.json();
+        setPayReceipt({
+          bookingCode: stay.bookingCode,
+          roomNumber,
+          guestName: stay.guest.fullName,
+          guestTaxId: stay.guest.idNumber || undefined,
+          amount: amt,
+          method: payMethod,
+          referenceNo: payRef,
+          remainingBalance: data.folio.balance,
+          paidAt: new Date().toLocaleString("th-TH"),
+          items: Array.isArray(data.folio.items) ? data.folio.items : [],
+        });
+        setPayStayId(null);
+        setPayRef("");
+        void refreshRooms();
+      } else {
+        const err = await res.json();
+        alert(err.error || "ชำระเงินไม่สำเร็จ");
+      }
+    } catch {
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setIsPaying(false);
     }
   }
 
@@ -797,10 +815,20 @@ export function FrontDeskClient({
                             </button>
                           )}
                           <button
+                            type="button"
+                            disabled={checkingOut}
                             onClick={() => startCheckOut(stay)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium disabled:opacity-50"
                           >
-                            <LogOut className="w-3.5 h-3.5" /> Check-out
+                            {checkingOut ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Check-out...
+                              </>
+                            ) : (
+                              <>
+                                <LogOut className="w-3.5 h-3.5" /> Check-out
+                              </>
+                            )}
                           </button>
                           {selectedRoom.status !== "VD" && selectedRoom.status !== "OOO" && (
                             <button
@@ -908,10 +936,20 @@ export function FrontDeskClient({
                         </div>
                         <button
                           type="submit"
-                          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold flex items-center justify-center gap-2 shadow-xs"
+                          disabled={isPaying}
+                          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-sm font-bold flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 transition cursor-pointer disabled:cursor-not-allowed"
                         >
-                          <CreditCard className="w-4 h-4" />
-                          ยืนยันชำระ &amp; ออกบิล (฿{payAmount.toLocaleString()})
+                          {isPaying ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              กำลังบันทึกชำระ &amp; ออกบิล...
+                            </>
+                          ) : (
+                            <>
+                              <CreditCard className="w-4 h-4" />
+                              ยืนยันชำระ &amp; ออกบิล (฿{payAmount.toLocaleString()})
+                            </>
+                          )}
                         </button>
                       </form>
                     )}

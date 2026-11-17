@@ -7,17 +7,15 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const [items, movements] = await Promise.all([
-    prisma.supplyItem.findMany({
-      where: { active: true },
-      orderBy: [{ category: "asc" }, { name: "asc" }],
-    }),
-    prisma.supplyMovement.findMany({
-      include: { supplyItem: true },
-      orderBy: { createdAt: "desc" },
-      take: 40,
-    }),
-  ]);
+  const items = await prisma.supplyItem.findMany({
+    where: { active: true },
+    orderBy: [{ category: "asc" }, { name: "asc" }],
+  });
+  const movements = await prisma.supplyMovement.findMany({
+    include: { supplyItem: true },
+    orderBy: { createdAt: "desc" },
+    take: 40,
+  });
 
   return NextResponse.json({ items, movements });
 }

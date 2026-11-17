@@ -7,22 +7,20 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const [folios, setting] = await Promise.all([
-    prisma.folio.findMany({
-      include: {
-        stay: {
-          include: {
-            room: true,
-            guest: true,
-          },
+  const folios = await prisma.folio.findMany({
+    include: {
+      stay: {
+        include: {
+          room: true,
+          guest: true,
         },
-        items: { orderBy: { createdAt: "desc" } },
-        payments: { orderBy: { paidAt: "desc" } },
       },
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.propertySetting.findUnique({ where: { id: 1 } }),
-  ]);
+      items: { orderBy: { createdAt: "desc" } },
+      payments: { orderBy: { paidAt: "desc" } },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+  const setting = await prisma.propertySetting.findUnique({ where: { id: 1 } });
 
   return NextResponse.json({ folios, setting });
 }

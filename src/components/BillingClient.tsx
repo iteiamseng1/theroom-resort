@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, CreditCard, Plus, Printer, Receipt, Search } from "lucide-react";
+import { CheckCircle2, CreditCard, Loader2, Plus, Printer, Receipt, Search } from "lucide-react";
 import { ResortLogo } from "@/components/ResortLogo";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -86,6 +86,7 @@ export function BillingClient({
   const [payAmount, setPayAmount] = useState(0);
   const [payMethod, setPayMethod] = useState("CASH");
   const [payRef, setPayRef] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // List filter
   const [searchQuery, setSearchQuery] = useState("");
@@ -139,23 +140,42 @@ export function BillingClient({
 
   async function handleRecordPayment(e: React.FormEvent) {
     e.preventDefault();
-    if (!selected) return;
-    const res = await fetch("/api/folios", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "RECORD_PAYMENT",
-        folioId: selected.id,
-        amount: payAmount > 0 ? payAmount : selected.balance,
-        method: payMethod,
-        referenceNo: payRef,
-        source: "FOLIO",
-      }),
-    });
-    if (res.ok) {
-      setPayAmount(0);
-      setPayRef("");
-      await refreshFolios();
+    if (!selected || isSubmitting) return;
+    const amt = payAmount > 0 ? payAmount : selected.balance;
+    if (amt <= 0) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/folios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "RECORD_PAYMENT",
+          folioId: selected.id,
+          amount: amt,
+          method: payMethod,
+          referenceNo: payRef,
+          source: "FOLIO",
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.folio) {
+          setFolios((prev) =>
+            prev.map((f) => (f.id === data.folio.id ? { ...f, ...data.folio } : f))
+          );
+        }
+        setPayAmount(0);
+        setPayRef("");
+        void refreshFolios();
+      } else {
+        const err = await res.json();
+        alert(err.error || "บันทึกชำระเงินไม่สำเร็จ");
+      }
+    } catch {
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -464,9 +484,19 @@ export function BillingClient({
                     )}
                     <button
                       type="submit"
-                      className="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold"
+                      disabled={isSubmitting}
+                      className="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-sm font-bold flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 transition cursor-pointer disabled:cursor-not-allowed"
                     >
-                      บันทึกรับชำระเงิน (฿{(payAmount > 0 ? payAmount : selected.balance).toLocaleString()})
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          กำลังบันทึกรับชำระเงิน...
+                        </>
+                      ) : (
+                        <>
+                          บันทึกรับชำระเงิน (฿{(payAmount > 0 ? payAmount : selected.balance).toLocaleString()})
+                        </>
+                      )}
                     </button>
                   </form>
                 ) : (

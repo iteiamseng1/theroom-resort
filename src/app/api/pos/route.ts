@@ -8,28 +8,26 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const [categories, tables, activeStays, orders, setting] = await Promise.all([
-    prisma.menuCategory.findMany({
-      include: { items: { where: { active: true }, orderBy: { name: "asc" } } },
-      orderBy: { sortOrder: "asc" },
-    }),
-    prisma.diningTable.findMany({ orderBy: { tableNumber: "asc" } }),
-    prisma.stay.findMany({
-      where: { status: "CHECKED_IN" },
-      include: { room: true, guest: true, folio: true },
-      orderBy: { room: { roomNumber: "asc" } },
-    }),
-    prisma.posOrder.findMany({
-      include: {
-        table: true,
-        stay: { include: { room: true, guest: true } },
-        items: { include: { menuItem: true } },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 40,
-    }),
-    prisma.propertySetting.findUnique({ where: { id: 1 } }),
-  ]);
+  const categories = await prisma.menuCategory.findMany({
+    include: { items: { where: { active: true }, orderBy: { name: "asc" } } },
+    orderBy: { sortOrder: "asc" },
+  });
+  const tables = await prisma.diningTable.findMany({ orderBy: { tableNumber: "asc" } });
+  const activeStays = await prisma.stay.findMany({
+    where: { status: "CHECKED_IN" },
+    include: { room: true, guest: true, folio: true },
+    orderBy: { room: { roomNumber: "asc" } },
+  });
+  const orders = await prisma.posOrder.findMany({
+    include: {
+      table: true,
+      stay: { include: { room: true, guest: true } },
+      items: { include: { menuItem: true } },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 40,
+  });
+  const setting = await prisma.propertySetting.findUnique({ where: { id: 1 } });
 
   return NextResponse.json({ categories, tables, activeStays, orders, setting });
 }

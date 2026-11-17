@@ -10,23 +10,21 @@ export async function GET(req: NextRequest) {
   const billingMonth =
     req.nextUrl.searchParams.get("month") || new Date().toISOString().slice(0, 7);
 
-  const [rooms, readings, setting] = await Promise.all([
-    prisma.room.findMany({
-      include: {
-        roomType: true,
-        stays: {
-          where: { status: "CHECKED_IN" },
-          include: { guest: true, folio: true },
-          take: 1,
-        },
+  const rooms = await prisma.room.findMany({
+    include: {
+      roomType: true,
+      stays: {
+        where: { status: "CHECKED_IN" },
+        include: { guest: true, folio: true },
+        take: 1,
       },
-      orderBy: { roomNumber: "asc" },
-    }),
-    prisma.utilityMeter.findMany({
-      where: { billingMonth },
-    }),
-    prisma.propertySetting.findUnique({ where: { id: 1 } }),
-  ]);
+    },
+    orderBy: { roomNumber: "asc" },
+  });
+  const readings = await prisma.utilityMeter.findMany({
+    where: { billingMonth },
+  });
+  const setting = await prisma.propertySetting.findUnique({ where: { id: 1 } });
 
   return NextResponse.json({ rooms, readings, setting, billingMonth });
 }
@@ -45,19 +43,17 @@ export async function POST(req: NextRequest) {
       postToFolio?: boolean;
     };
 
-    const [room, setting] = await Promise.all([
-      prisma.room.findUnique({
-        where: { id: roomId },
-        include: {
-          stays: {
-            where: { status: "CHECKED_IN" },
-            include: { folio: true },
-            take: 1,
-          },
+    const room = await prisma.room.findUnique({
+      where: { id: roomId },
+      include: {
+        stays: {
+          where: { status: "CHECKED_IN" },
+          include: { folio: true },
+          take: 1,
         },
-      }),
-      prisma.propertySetting.findUnique({ where: { id: 1 } }),
-    ]);
+      },
+    });
+    const setting = await prisma.propertySetting.findUnique({ where: { id: 1 } });
 
     if (!room) {
       return NextResponse.json({ error: "ไม่พบห้องพัก" }, { status: 404 });
