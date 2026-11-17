@@ -46,7 +46,7 @@ export const MENU_DEFINITIONS: MenuPermissionDef[] = [
   },
   {
     href: "/guests",
-    label: "ฐานข้อมูลลูกค้า",
+    label: "ข้อมูลลูกค้า",
     defaultRoles: ["OWNER", "MANAGER", "FRONT_DESK"],
   },
   {

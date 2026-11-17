@@ -58,7 +58,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/guests",
-    label: "ฐานข้อมูลลูกค้า",
+    label: "ข้อมูลลูกค้า",
     icon: Users,
     group: "front",
     roles: ["OWNER", "MANAGER", "FRONT_DESK"],
