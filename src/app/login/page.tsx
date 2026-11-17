@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { KeyRound, Loader2, User } from "lucide-react";
+import { BookOpen, KeyRound, Loader2, User } from "lucide-react";
 import { ResortLogo } from "@/components/ResortLogo";
 
 const DEMO_ACCOUNTS = [
@@ -237,6 +238,16 @@ export default function LoginPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="pt-2 text-center border-t border-slate-200/70">
+            <Link
+              href="/manual"
+              className="inline-flex items-center justify-center gap-2 w-full py-2 rounded-xl bg-[#FAF0DC] hover:bg-[#F6E6C5] border border-[#C89B35]/40 text-[#5C3A1E] hover:text-[#2D160B] text-xs font-bold transition shadow-xs"
+            >
+              <BookOpen className="w-4 h-4 text-[#C89B35]" />
+              <span>คู่มือการใช้งานระบบ (PDF)</span>
+            </Link>
           </div>
         </form>
       </div>
