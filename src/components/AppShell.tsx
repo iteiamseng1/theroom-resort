@@ -283,8 +283,8 @@ export function AppShell({
       </aside>
 
       {/* Mobile Top Header */}
-      <header className="no-print md:hidden sticky top-0 z-50 w-full bg-[#2D160B] text-[#FAF5EE] border-b border-[#C89B35]/25 pt-[env(safe-area-inset-top,0px)]">
-        <div className="px-4 py-2.5 flex items-center justify-between min-h-[52px]">
+      <header className="no-print md:hidden sticky top-0 z-50 w-full bg-[#2D160B] text-[#FAF5EE] border-b border-[#C89B35]/25 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-3 px-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <img
               src="/logo-theroom.svg"
@@ -292,10 +292,10 @@ export function AppShell({
               className="w-11 h-auto rounded-md shrink-0"
             />
             <div className="min-w-0">
-              <div className="text-sm font-bold truncate text-[#F6DC93]">
+              <div className="text-sm font-bold truncate text-[#F6DC93] leading-tight">
                 {hotelName}
               </div>
-              <div className="text-[10px] text-[#EADFCF]/80 truncate">
+              <div className="text-[11px] text-[#EADFCF]/85 truncate mt-0.5">
                 {user.name} • {ROLE_LABELS[user.role] ?? user.role}
               </div>
             </div>
