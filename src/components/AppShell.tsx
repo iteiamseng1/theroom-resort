@@ -282,8 +282,14 @@ export function AppShell({
         </div>
       </aside>
 
+      {/* iOS Top Status Bar Solid Fill (eliminates any WebKit PWA glass blur) */}
+      <div
+        className="no-print md:hidden fixed top-0 inset-x-0 h-[max(2.75rem,env(safe-area-inset-top))] bg-[#2D160B] z-[60] pointer-events-none"
+        aria-hidden="true"
+      />
+
       {/* Mobile Top Header */}
-      <header className="no-print md:hidden sticky top-0 z-50 w-full bg-[#2D160B] text-[#FAF5EE] border-b border-[#C89B35]/25 pt-[calc(env(safe-area-inset-top,0px)+16px)] pb-3 px-4">
+      <header className="no-print md:hidden sticky top-0 z-50 w-full bg-[#2D160B] text-[#FAF5EE] border-b border-[#C89B35]/25 pt-[calc(max(2.75rem,env(safe-area-inset-top))+12px)] pb-3 px-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <img
