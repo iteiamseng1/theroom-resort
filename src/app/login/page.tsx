@@ -88,12 +88,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-[#2D160B] flex items-center justify-center p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="fixed inset-0 bg-[#2D160B] -z-10" aria-hidden="true" />
-      <div className="w-full max-w-md bg-[#FAF6EE] border border-[#C89B35]/40 rounded-2xl shadow-2xl overflow-hidden">
-        <div className="bg-[#2D160B] text-[#FAF5EE] px-6 py-6 flex flex-col items-center text-center gap-3 border-b border-[#C89B35]/30">
-          <ResortLogo className="w-44 h-auto drop-shadow-md" />
-          <p className="text-xs text-[#E4C165]">
+    <div className="relative min-h-[100dvh] w-full bg-[#2D160B] flex flex-col items-center justify-center p-3 sm:p-4 py-4 sm:py-8 overflow-y-auto">
+      <div className="fixed inset-0 bg-[#2D160B] -z-10 pointer-events-none" aria-hidden="true" />
+      <div className="w-full max-w-sm sm:max-w-md bg-[#FAF6EE] border border-[#C89B35]/40 rounded-2xl shadow-2xl overflow-hidden my-auto">
+        <div className="bg-[#2D160B] text-[#FAF5EE] px-4 py-3.5 sm:px-6 sm:py-4 flex flex-col items-center text-center gap-1.5 sm:gap-2 border-b border-[#C89B35]/30">
+          <ResortLogo className="w-28 sm:w-36 h-auto drop-shadow-md" />
+          <p className="text-[11px] sm:text-xs text-[#E4C165]">
             ระบบบริหารโรงแรม ที่พักรายเดือน &amp; ห้องอาหาร POS
           </p>
         </div>
@@ -103,25 +103,25 @@ export default function LoginPage() {
             e.preventDefault();
             doLogin(username, password);
           }}
-          className="p-6 space-y-4"
+          className="p-4 sm:p-6 space-y-3 sm:space-y-4"
         >
           {error && (
-            <div className="rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-sm px-3 py-2">
+            <div className="rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm px-3 py-2">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-1">
               ชื่อผู้ใช้ (Username)
             </label>
             <div className="relative">
-              <User className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 sm:top-3" />
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C89B35] focus:border-[#C89B35]"
+                className="w-full pl-9 pr-3 py-1.5 sm:py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C89B35] focus:border-[#C89B35]"
                 required
               />
             </div>
@@ -129,7 +129,7 @@ export default function LoginPage() {
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-xs sm:text-sm font-medium text-slate-700">
                 รหัสผ่าน (Password)
               </label>
               <button
@@ -145,12 +145,12 @@ export default function LoginPage() {
               </button>
             </div>
             <div className="relative">
-              <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+              <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 sm:top-3" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C89B35] focus:border-[#C89B35]"
+                className="w-full pl-9 pr-3 py-1.5 sm:py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#C89B35] focus:border-[#C89B35]"
                 required
               />
             </div>
@@ -209,17 +209,17 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-lg bg-gradient-to-r from-[#D4AF49] to-[#B68621] hover:from-[#DFBC59] hover:to-[#C69328] text-[#241007] font-bold text-sm flex items-center justify-center gap-2 transition shadow-sm disabled:opacity-60"
+            className="w-full py-2 sm:py-2.5 rounded-lg bg-gradient-to-r from-[#D4AF49] to-[#B68621] hover:from-[#DFBC59] hover:to-[#C69328] text-[#241007] font-bold text-sm flex items-center justify-center gap-2 transition shadow-sm disabled:opacity-60"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             เข้าสู่ระบบ
           </button>
 
-          <div className="pt-3 border-t border-slate-100">
-            <p className="text-xs font-medium text-slate-500 mb-2">
+          <div className="pt-2.5 border-t border-slate-200/80">
+            <p className="text-[11px] sm:text-xs font-medium text-slate-500 mb-1.5">
               เข้าสู่ระบบด่วน (บัญชีทดสอบตามตำแหน่ง):
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-1.5">
               {DEMO_ACCOUNTS.map((acc) => (
                 <button
                   key={acc.username}
@@ -230,10 +230,10 @@ export default function LoginPage() {
                     setPassword(acc.pass);
                     doLogin(acc.username, acc.pass);
                   }}
-                  className="text-left px-3 py-2 rounded-lg border border-[#E6D9C2] bg-white hover:border-[#C89B35] hover:bg-[#FAF0DC] transition"
+                  className="text-center px-1.5 py-1.5 rounded-lg border border-[#E6D9C2] bg-white hover:border-[#C89B35] hover:bg-[#FAF0DC] transition"
                 >
-                  <div className="text-xs font-semibold text-slate-800">{acc.label}</div>
-                  <div className="text-[10px] text-slate-400">{acc.username}</div>
+                  <div className="text-[11px] font-semibold text-slate-800 truncate">{acc.label}</div>
+                  <div className="text-[9px] text-slate-400 truncate">{acc.username}</div>
                 </button>
               ))}
             </div>
