@@ -369,6 +369,50 @@ export function ManualClient() {
                   </div>
                 </div>
               </div>
+
+              {/* Step 5: Supply Requisition (Front Desk responsibility by permissions) */}
+              <div className="space-y-3 pt-2 border-t border-slate-100">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-sky-600 text-white text-xs font-bold flex items-center justify-center">5</span>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    การเบิกของใช้ &amp; ผ้าปูที่นอน (เมนู: เบิกของใช้ /supplies)
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                  <div
+                    onClick={() => setPreviewImage({
+                      src: "/manual-images/08-supplies.png",
+                      title: "คลังของใช้ & เบิกจ่าย (Supplies - สิทธิ์ฟรอนต์)",
+                      desc: "ฟรอนต์ทำหน้าที่บันทึกการเบิกสบู่ แชมพู ทิชชู ผ้าปูที่นอน ปลอกหมอน จ่ายให้แม่บ้านนำไปเติมในห้อง",
+                    })}
+                    className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition cursor-pointer bg-slate-100"
+                  >
+                    <img src="/manual-images/08-supplies.png" alt="คลังของใช้" className="w-full h-auto object-cover group-hover:scale-[1.01] transition duration-200" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white gap-1.5 text-xs font-bold">
+                      <Maximize2 className="w-4 h-4" /> แตะเพื่อดูภาพใหญ่
+                    </div>
+                    <div className="p-2 text-[11px] font-semibold text-slate-700 bg-white border-t border-slate-200 flex justify-between">
+                      <span>ภาพ: เมนูเบิกของใช้ของฟรอนต์</span>
+                      <span className="text-sky-700">🔍 ดูรูปใหญ่</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-xs text-slate-700 leading-relaxed">
+                    <div className="p-3.5 rounded-xl bg-sky-50 border border-sky-200 space-y-1.5 text-sky-950">
+                      <div className="font-bold">📦 หน้าที่ฟรอนต์ในการเบิกจ่ายตามสิทธิ์:</div>
+                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                        พนักงานต้อนรับ (ฟรอนต์) เป็นผู้ดูแลการเบิกจ่ายของใช้ในห้องพักและชุดเครื่องนอนให้แม่บ้าน
+                      </p>
+                      <ul className="list-disc pl-4 space-y-1 text-slate-600 text-[11px]">
+                        <li>เข้าเมนู <strong>"เบิกของใช้"</strong> เลือกว่าต้องการเบิก สบู่ แชมพู ทิชชู น้ำดื่ม หรือผ้าปูที่นอน</li>
+                        <li>ระบุจำนวนชิ้นที่จ่ายให้แม่บ้านนำไปเติมในห้อง</li>
+                        <li>กดยืนยันเบิก → ยอดสต็อกกลางจะตัดยอดอัตโนมัติ เพื่อให้ยอดคงเหลือตรงกับความเป็นจริงตลอดเวลา</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         )}
@@ -391,7 +435,7 @@ export function ManualClient() {
                 </div>
               </div>
               <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-700/60 text-emerald-200 border border-emerald-500/40 hidden sm:inline-block">
-                ดูคิวทำความสะอาดบนมือถือ • อัปเดตห้องพร้อมขาย • เบิกของใช้
+                ดูคิวทำความสะอาดบนมือถือ • อัปเดตห้องพร้อมขาย (VC)
               </span>
             </div>
 
@@ -407,13 +451,13 @@ export function ManualClient() {
                   <p className="text-xs text-slate-600 leading-relaxed">
                     แม่บ้านสามารถล็อกอินผ่านมือถือด้วยบัญชี <strong>housekeeping (รหัส: 1234)</strong> ระบบจะแสดงเฉพาะห้องที่แขกเพิ่งเช็คเอาต์ (สีเหลือง) แบบเรียลไทม์ โดยไม่ต้องรอให้ฟรอนต์โทรบอก
                   </p>
-                  <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1.5 text-xs text-emerald-950">
-                    <div className="font-bold">✨ ขั้นตอนการทำงานหน้างาน:</div>
-                    <ul className="space-y-1.5 pl-1">
-                      <li>• <strong>เดินไปที่ห้อง:</strong> กดปุ่มไอคอนเล่น ▶️ เพื่อแจ้งว่า <em>"กำลังทำความสะอาด"</em></li>
-                      <li>• <strong>ตรวจมินิบาร์:</strong> เช็คขนม เครื่องดื่ม และสิ่งของชำรุดในห้องพัก</li>
-                      <li>• <strong>ทำความสะอาดเสร็จ:</strong> กดปุ่มเครื่องหมายถูก ✔️ ห้องจะเด้งเป็น <strong>สีเขียว (พร้อมขาย)</strong> ให้ฟรอนต์เห็นทันที!</li>
-                    </ul>
+                  <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 space-y-2 text-xs text-emerald-950">
+                    <div className="font-bold">✨ ขั้นตอนการทำงานของแม่บ้าน:</div>
+                    <ol className="list-decimal pl-4 space-y-1.5 text-[11px]">
+                      <li><strong>เดินไปที่ห้อง:</strong> กดปุ่มไอคอนเล่น ▶️ เพื่อแจ้งว่า <em>"กำลังทำความสะอาด"</em></li>
+                      <li><strong>ตรวจมินิบาร์:</strong> เช็คขนม เครื่องดื่ม และสิ่งของชำรุด หากมีให้แจ้งฟรอนต์ทันที</li>
+                      <li><strong>ทำความสะอาดเสร็จ:</strong> ปูเตียงเรียบร้อย กดปุ่มเครื่องหมายถูก ✔️ ห้องจะเด้งเป็น <strong>สีเขียว (พร้อมขาย VC)</strong> ให้ฟรอนต์เห็นบนหน้าจอทันที!</li>
+                    </ol>
                   </div>
                 </div>
 
@@ -444,43 +488,6 @@ export function ManualClient() {
                     <div className="p-2 text-[10px] font-semibold text-slate-700 bg-white border-t border-slate-200">
                       📱 บนมือถือแม่บ้าน
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Supply requisition */}
-              <div className="space-y-3 pt-3 border-t border-slate-100">
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">2</span>
-                  <h3 className="text-sm font-bold text-slate-900">
-                    การเบิกของใช้ &amp; ผ้าปูที่นอน (เมนู: เบิกของใช้ /supplies)
-                  </h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                  <div
-                    onClick={() => setPreviewImage({
-                      src: "/manual-images/08-supplies.png",
-                      title: "คลังของใช้ & เบิกจ่าย (Supplies)",
-                      desc: "บันทึกการเบิกสบู่ แชมพู ทิชชู ผ้าปูที่นอน ปลอกหมอน พร้อมระบบนับสต็อกคงเหลือ",
-                    })}
-                    className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition cursor-pointer bg-slate-100"
-                  >
-                    <img src="/manual-images/08-supplies.png" alt="คลังของใช้" className="w-full h-auto object-cover group-hover:scale-[1.01] transition duration-200" />
-                    <div className="p-2 text-[11px] font-semibold text-slate-700 bg-white border-t border-slate-200 flex justify-between">
-                      <span>ภาพ: หน้าคลังของใช้และของในห้อง</span>
-                      <span className="text-emerald-700">🔍 ดูรูปใหญ่</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 text-xs text-slate-700 leading-relaxed">
-                    <p>
-                      เมื่อต้องการนำสบู่ ยาสระผม กระดาษทิชชู หรือชุดเครื่องนอนไปเติมในห้องพัก ให้เข้าเมนู <strong>"เบิกของใช้"</strong>
-                    </p>
-                    <ul className="list-disc pl-4 space-y-1 text-slate-600">
-                      <li>เลือกรายการสิ่งของที่ต้องการเบิก</li>
-                      <li>ใส่จำนวนชิ้นที่เบิกไปใช้งาน</li>
-                      <li>กดยืนยันเบิก → ยอดสต็อกคงเหลือในระบบจะลดลงอัตโนมัติ เพื่อให้ผู้จัดการสั่งซื้อของเพิ่มได้ทันท่วงที</li>
-                    </ul>
                   </div>
                 </div>
               </div>
