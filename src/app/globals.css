@@ -18,8 +18,8 @@ body {
   z-index: 50;
   width: 100%;
   background-color: #2D160B;
-  /* Compact iOS Safe Area: lifts content up closer to the status bar */
-  padding-top: max(env(safe-area-inset-top, 0px), 8px);
+  /* Lifted up by 12-14px as requested */
+  padding-top: max(calc(env(safe-area-inset-top, 24px) - 12px), 8px);
   border-bottom: 1px solid rgba(200, 155, 53, 0.25);
 }
 

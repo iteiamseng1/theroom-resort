@@ -284,7 +284,7 @@ export function AppShell({
 
       {/* Mobile Top Header (Compact iOS Safe Area support, sticky, solid background) */}
       <header className="no-print md:hidden mobile-pwa-header text-[#FAF5EE] shadow-md">
-        <div className="pt-0.5 pb-1.5 px-3 sm:px-4 flex items-center justify-between">
+        <div className="pt-0 pb-1 px-3 sm:px-4 flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
             <img
               src="/logo-theroom.svg"
