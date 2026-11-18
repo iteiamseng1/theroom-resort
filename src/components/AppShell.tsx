@@ -282,45 +282,45 @@ export function AppShell({
         </div>
       </aside>
 
-      {/* Mobile Top Header (Full iOS Safe Area support, sticky, solid background) */}
+      {/* Mobile Top Header (Compact iOS Safe Area support, sticky, solid background) */}
       <header className="no-print md:hidden mobile-pwa-header text-[#FAF5EE] shadow-md">
-        <div className="pt-2 pb-3 px-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="pt-0.5 pb-1.5 px-3 sm:px-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 min-w-0">
             <img
               src="/logo-theroom.svg"
               alt="The Room Resort"
-              className="w-11 h-auto rounded-md shrink-0 drop-shadow-sm"
+              className="w-9 sm:w-10 h-auto rounded-md shrink-0 drop-shadow-sm"
             />
             <div className="min-w-0">
-              <div className="text-sm font-bold truncate text-[#F6DC93] leading-tight">
+              <div className="text-xs sm:text-sm font-bold truncate text-[#F6DC93] leading-tight">
                 {hotelName}
               </div>
-              <div className="text-[11px] text-[#EADFCF]/85 truncate mt-0.5">
+              <div className="text-[10px] sm:text-[11px] text-[#EADFCF]/85 truncate mt-0.5">
                 {user.name} • {ROLE_LABELS[user.role] ?? user.role}
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {installPrompt && (
               <button
                 onClick={handleInstall}
-                className="p-2 rounded-lg bg-[#C89B35]/20 text-[#F6DC93]"
+                className="p-1.5 rounded-lg bg-[#C89B35]/20 text-[#F6DC93]"
                 title="ติดตั้งแอป"
               >
-                <Smartphone className="w-4 h-4" />
+                <Smartphone className="w-3.5 h-3.5" />
               </button>
             )}
             {visibleNav.some((n) => n.href === "/settings") && (
-              <Link href="/settings" prefetch={false} className="p-2 rounded-lg hover:bg-[#432313] text-[#EADFCF]" title="ตั้งค่าระบบ">
-                <Settings className="w-4 h-4" />
+              <Link href="/settings" prefetch={false} className="p-1.5 rounded-lg hover:bg-[#432313] text-[#EADFCF]" title="ตั้งค่าระบบ">
+                <Settings className="w-3.5 h-3.5" />
               </Link>
             )}
             <button
               onClick={handleLogout}
-              className="p-2 rounded-lg hover:bg-[#432313] text-[#EADFCF]"
+              className="p-1.5 rounded-lg hover:bg-[#432313] text-[#EADFCF]"
               title="ออกจากระบบ"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
