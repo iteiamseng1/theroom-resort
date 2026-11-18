@@ -25,12 +25,11 @@ import {
   Users,
   UtensilsCrossed,
   X,
-  Zap,
 } from "lucide-react";
 import { ResortLogo } from "@/components/ResortLogo";
 import { ManualPrintButton } from "./ManualPrintButton";
 
-type RoleTab = "ALL" | "FRONT" | "HOUSEKEEPING" | "POS" | "METERS" | "MANAGER";
+type RoleTab = "ALL" | "FRONT" | "HOUSEKEEPING" | "POS" | "MANAGER";
 
 interface ImagePreviewData {
   src: string;
@@ -47,8 +46,7 @@ export function ManualClient() {
     { id: "FRONT", label: "1. ฟรอนต์ / พนักงานต้อนรับ", icon: <BedDouble className="w-3.5 h-3.5" />, badgeColor: "bg-sky-700 text-white" },
     { id: "HOUSEKEEPING", label: "2. แผนกแม่บ้าน", icon: <Sparkles className="w-3.5 h-3.5" />, badgeColor: "bg-emerald-700 text-white" },
     { id: "POS", label: "3. ร้านอาหาร & มินิบาร์", icon: <UtensilsCrossed className="w-3.5 h-3.5" />, badgeColor: "bg-amber-700 text-white" },
-    { id: "METERS", label: "4. จดมิเตอร์น้ำ-ไฟ", icon: <Zap className="w-3.5 h-3.5" />, badgeColor: "bg-violet-700 text-white" },
-    { id: "MANAGER", label: "5. เจ้าของ & ผู้จัดการ", icon: <Shield className="w-3.5 h-3.5" />, badgeColor: "bg-rose-700 text-white" },
+    { id: "MANAGER", label: "4. เจ้าของ & ผู้จัดการ", icon: <Shield className="w-3.5 h-3.5" />, badgeColor: "bg-rose-700 text-white" },
   ];
 
   return (
@@ -92,13 +90,13 @@ export function ManualClient() {
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#C89B35]/20 border border-[#C89B35]/40 text-[#F6DC93] text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>คู่มือการใช้งานระบบระบบ TheRoom Resort 2026 (พร้อมภาพประกอบทุกฟังก์ชัน)</span>
+              <span>คู่มือการใช้งานระบบ TheRoom Resort (ห้องพักรายวัน 450.- &amp; ห้องอาหาร POS)</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-[#F6DC93]">
               คู่มือการปฏิบัติงานแยกตามตำแหน่งหน้าที่ (SOP)
             </h1>
             <p className="text-xs sm:text-sm text-[#EADFCF]/90 max-w-2xl leading-relaxed">
-              สำหรับพนักงานต้อนรับ (ฟรอนต์), แผนกแม่บ้าน, ร้านอาหาร/POS, เจ้าหน้าที่จดมิเตอร์ และเจ้าของกิจการ/ผู้จัดการ
+              สำหรับพนักงานต้อนรับ (ฟรอนต์), แผนกแม่บ้าน, แคชเชียร์ร้านอาหาร/มินิบาร์ และเจ้าของกิจการ/ผู้จัดการ
             </p>
           </div>
           <ResortLogo className="w-24 sm:w-28 h-auto drop-shadow-md shrink-0 hidden sm:block" />
@@ -112,7 +110,7 @@ export function ManualClient() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
                   isActive
                     ? "bg-[#2D160B] text-[#F6DC93] shadow-sm"
                     : "bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
@@ -126,45 +124,43 @@ export function ManualClient() {
         </div>
 
         {/* Quick Accounts Info Bar */}
-        {(activeTab === "ALL" || activeTab === "FRONT" || activeTab === "HOUSEKEEPING" || activeTab === "MANAGER") && (
-          <section className="bg-white rounded-2xl border border-[#E6D9C2] p-4 sm:p-5 shadow-xs space-y-3">
-            <div className="flex items-center justify-between border-b border-[#F0E6D6] pb-2.5">
-              <div className="flex items-center gap-2">
-                <KeyRound className="w-4 h-4 text-[#C89B35]" />
-                <h2 className="text-xs sm:text-sm font-bold text-slate-900">
-                  รหัสผ่านเข้าใช้งานระบบแต่ละตำแหน่ง (กดเปลี่ยนบทบาทหน้าแรกได้ทันที)
-                </h2>
+        <section className="bg-white rounded-2xl border border-[#E6D9C2] p-4 sm:p-5 shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-[#F0E6D6] pb-2.5">
+            <div className="flex items-center gap-2">
+              <KeyRound className="w-4 h-4 text-[#C89B35]" />
+              <h2 className="text-xs sm:text-sm font-bold text-slate-900">
+                รหัสผ่านเข้าใช้งานระบบแต่ละตำแหน่ง (แตะรูปหน้าจอเพื่อขยายภาพใหญ่ได้ทุกรูป)
+              </h2>
+            </div>
+            <span className="text-[11px] text-slate-500">คลิกที่การ์ดเพื่อดูตัวอย่าง</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+            <div className="p-3 rounded-xl border border-sky-200 bg-sky-50/50 flex items-center justify-between">
+              <div>
+                <div className="text-[11px] font-bold text-sky-900">1. พนักงานต้อนรับ (Front Desk)</div>
+                <div className="text-xs text-slate-700">User: <strong className="text-slate-900">frontdesk</strong> | Pass: <strong className="text-slate-900">1234</strong></div>
               </div>
-              <span className="text-[11px] text-slate-500">แตะรูปหน้าจอเพื่อขยายภาพใหญ่ได้ทุกรูป</span>
+              <BedDouble className="w-5 h-5 text-sky-600 shrink-0" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-              <div className="p-3 rounded-xl border border-sky-200 bg-sky-50/50 flex items-center justify-between">
-                <div>
-                  <div className="text-[11px] font-bold text-sky-900">1. พนักงานต้อนรับ (Front Desk)</div>
-                  <div className="text-xs text-slate-700">User: <strong className="text-slate-900">frontdesk</strong> | Pass: <strong className="text-slate-900">1234</strong></div>
-                </div>
-                <BedDouble className="w-5 h-5 text-sky-600 shrink-0" />
+            <div className="p-3 rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between">
+              <div>
+                <div className="text-[11px] font-bold text-emerald-900">2. แม่บ้าน &amp; ซ่อมบำรุง</div>
+                <div className="text-xs text-slate-700">User: <strong className="text-slate-900">housekeeping</strong> | Pass: <strong className="text-slate-900">1234</strong></div>
               </div>
-
-              <div className="p-3 rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between">
-                <div>
-                  <div className="text-[11px] font-bold text-emerald-900">2. แม่บ้าน &amp; ซ่อมบำรุง</div>
-                  <div className="text-xs text-slate-700">User: <strong className="text-slate-900">housekeeping</strong> | Pass: <strong className="text-slate-900">1234</strong></div>
-                </div>
-                <Sparkles className="w-5 h-5 text-emerald-600 shrink-0" />
-              </div>
-
-              <div className="p-3 rounded-xl border border-amber-200 bg-amber-50/50 flex items-center justify-between">
-                <div>
-                  <div className="text-[11px] font-bold text-amber-900">3. เจ้าของ / ผู้จัดการ (Owner)</div>
-                  <div className="text-xs text-slate-700">User: <strong className="text-slate-900">admin</strong> | Pass: <strong className="text-slate-900">admin123</strong></div>
-                </div>
-                <Shield className="w-5 h-5 text-amber-600 shrink-0" />
-              </div>
+              <Sparkles className="w-5 h-5 text-emerald-600 shrink-0" />
             </div>
-          </section>
-        )}
+
+            <div className="p-3 rounded-xl border border-amber-200 bg-amber-50/50 flex items-center justify-between">
+              <div>
+                <div className="text-[11px] font-bold text-amber-900">3. เจ้าของ / ผู้จัดการ (Owner)</div>
+                <div className="text-xs text-slate-700">User: <strong className="text-slate-900">admin</strong> | Pass: <strong className="text-slate-900">admin123</strong></div>
+              </div>
+              <Shield className="w-5 h-5 text-amber-600 shrink-0" />
+            </div>
+          </div>
+        </section>
 
         {/* ============================================================== */}
         {/* ROLE 1: FRONT DESK                                            */}
@@ -184,7 +180,7 @@ export function ManualClient() {
                 </div>
               </div>
               <span className="text-xs px-2.5 py-1 rounded-full bg-sky-700/60 text-sky-200 border border-sky-500/40 hidden sm:inline-block">
-                ผังห้องพัก • เช็คอิน • รับชำระ • เช็คเอาต์
+                ผังห้องพัก • เปิดห้องพักรายวัน • รับชำระ • พิมพ์ใบเสร็จ • เช็คเอาต์
               </span>
             </div>
 
@@ -224,7 +220,7 @@ export function ManualClient() {
                   </h3>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  หน้าจอหลักสำหรับดูสถานะห้องทั้งหมด แบ่งเป็น โซน 1 (ห้อง 101–106) และ โซน 2 (ห้อง 201–206) สามารถคลิกที่แถบด้านบนเพื่อกรองดูเฉพาะห้องที่ว่าง หรือห้องที่มีแขกได้ทันที
+                  หน้าจอหลักสำหรับดูสถานะห้องทั้งหมดแบบเรียลไทม์ แบ่งเป็น โซน 1 (ห้อง 101–106) และ โซน 2 (ห้อง 201–206) แสดงราคาห้องพักรายวัน ฿450/คืน ชัดเจนทุกห้อง สามารถคลิกที่แถบด้านบนเพื่อกรองดูเฉพาะห้องที่ว่าง หรือห้องที่มีแขกได้ทันที
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -232,7 +228,7 @@ export function ManualClient() {
                     onClick={() => setPreviewImage({
                       src: "/manual-images/02-frontdesk.png",
                       title: "หน้าผังห้องพัก 28 ห้อง (เดสก์ท็อป)",
-                      desc: "แสดงสถานะห้องพัก 28 ห้องแบบเรียลไทม์ โซน 1 และ 2 พร้อมแถบกรองสถานะ",
+                      desc: "แสดงสถานะห้องพัก 28 ห้องแบบเรียลไทม์ โซน 1 และ 2 ราคามาตรฐาน 450 บาท/คืน",
                     })}
                     className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition cursor-pointer bg-slate-100"
                   >
@@ -250,7 +246,7 @@ export function ManualClient() {
                     onClick={() => setPreviewImage({
                       src: "/manual-images/11-mobile-frontdesk.png",
                       title: "หน้าผังห้องพักบนมือถือ (iPhone / Smartphone)",
-                      desc: "ฟรอนต์สามารถใช้มือถือเดินตรวจห้อง หรือเปิดรับเช็คอินได้ทุกที่ในรีสอร์ท",
+                      desc: "ฟรอนต์สามารถใช้มือถือเปิดรับเช็คอินหรือตรวจดูห้องว่างได้ทุกที่ในรีสอร์ท",
                     })}
                     className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition cursor-pointer bg-slate-100 flex flex-col justify-between"
                   >
@@ -271,26 +267,20 @@ export function ManualClient() {
                 <div className="flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-sky-600 text-white text-xs font-bold flex items-center justify-center">2</span>
                   <h3 className="text-sm font-bold text-slate-900">
-                    ขั้นตอนการเปิดห้องพัก / เช็คอิน (Check-in Walk-in)
+                    ขั้นตอนการเปิดห้องพักรายวัน / เช็คอิน (Check-in Walk-in)
                   </h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                   <div className="space-y-2 text-xs text-slate-700 leading-relaxed">
-                    <div className="p-3 rounded-xl bg-sky-50 border border-sky-200 space-y-1.5">
-                      <div className="font-bold text-sky-950">ขั้นตอนที่ต้องทำ:</div>
-                      <ol className="list-decimal pl-4 space-y-1">
+                    <div className="p-3.5 rounded-xl bg-sky-50 border border-sky-200 space-y-2">
+                      <div className="font-bold text-sky-950">ขั้นตอนการเปิดห้องง่ายๆ ใน 1 นาที:</div>
+                      <ol className="list-decimal pl-4 space-y-1.5">
                         <li>คลิกที่ห้องที่มีป้าย <strong>สีเขียว (ว่างพร้อมพัก)</strong></li>
-                        <li>เลือกรูปแบบการพัก:
-                          <ul className="list-disc pl-3 text-slate-600 text-[11px] pt-0.5">
-                            <li><strong>รายวัน (Daily):</strong> ค่าห้อง 450 บาท/คืน</li>
-                            <li><strong>ชั่วคราว (3 ชม.):</strong> 400 บาท (สำหรับพักผ่อนระยะสั้น)</li>
-                            <li><strong>รายเดือน (Monthly):</strong> 3,500 บาท/เดือน</li>
-                          </ul>
-                        </li>
-                        <li>กรอกชื่อ และเบอร์โทรศัพท์ของแขก</li>
-                        <li>ระบบจะเพิ่มยอด <strong>มัดจำกุญแจ 200 บาท</strong> ให้อัตโนมัติ</li>
-                        <li>เลือกว่ารับเงินเป็น <strong>เงินสด</strong> หรือ <strong>โอน QR</strong></li>
+                        <li>ระบบจะตั้งค่าเป็น <strong>ห้องพักรายวัน (450 บาท/คืน)</strong> ให้อัตโนมัติ</li>
+                        <li>กรอกชื่อ และเบอร์โทรศัพท์ของลูกค้าผู้เข้าพัก</li>
+                        <li>ระบบคำนวณยอด <strong>มัดจำกุญแจ 200 บาท</strong> ให้อัตโนมัติ (ยอดรวมชำระ = 650 บาท)</li>
+                        <li>เลือกว่ารับเงินเป็น <strong>เงินสด</strong> หรือ <strong>สแกน QR โอนเงิน</strong></li>
                         <li>กดปุ่ม <strong>"ยืนยันเปิดห้องพัก"</strong> → ห้องจะเปลี่ยนเป็นสีฟ้าทันที!</li>
                       </ol>
                     </div>
@@ -299,8 +289,8 @@ export function ManualClient() {
                   <div
                     onClick={() => setPreviewImage({
                       src: "/manual-images/03-checkin-modal.png",
-                      title: "หน้าต่างเปิดห้อง / เช็คอิน (Check-in Popup)",
-                      desc: "ฟอร์มเช็คอินรวดเร็ว รองรับรายวัน/ชั่วคราว/รายเดือน พร้อมคิดค่ามัดจำกุญแจและเลือกวิธีชำระเงิน",
+                      title: "หน้าต่างเปิดห้องรายวัน / เช็คอิน (Check-in Popup)",
+                      desc: "ฟอร์มเปิดห้องพักรายวัน 450.- เก็บค่ามัดจำกุญแจ 200.- เลือกว่ารับสดหรือโอนเงิน",
                     })}
                     className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition cursor-pointer bg-slate-100"
                   >
@@ -309,7 +299,7 @@ export function ManualClient() {
                       <Maximize2 className="w-4 h-4" /> แตะเพื่อดูภาพใหญ่
                     </div>
                     <div className="p-2 text-[11px] font-semibold text-slate-700 bg-white border-t border-slate-200 flex justify-between">
-                      <span>ภาพ: ป๊อปอัปฟอร์มเปิดห้อง</span>
+                      <span>ภาพ: ป๊อปอัปฟอร์มเปิดห้องพักรายวัน</span>
                       <span className="text-sky-700">🔍 ดูรูปใหญ่</span>
                     </div>
                   </div>
@@ -346,12 +336,12 @@ export function ManualClient() {
 
                   <div className="space-y-2 text-xs text-slate-700 leading-relaxed">
                     <p>
-                      เมื่อต้องการพิมพ์ใบเสร็จให้แขก สามารถกดเข้าไปที่ห้องพัก หรือเมนู <strong>"รับชำระ"</strong> แล้วกดไอคอนเครื่องพิมพ์ 🖨️
+                      เมื่อต้องการพิมพ์ใบเสร็จให้ลูกค้า สามารถกดเข้าไปที่ห้องพัก หรือเมนู <strong>"รับชำระ"</strong> แล้วกดไอคอนเครื่องพิมพ์ 🖨️
                     </p>
                     <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-amber-950 space-y-1">
-                      <div className="font-bold">📄 ขนาดใบเสร็จที่แนะนำ:</div>
+                      <div className="font-bold">📄 ขนาดใบเสร็จมาตรฐาน:</div>
                       <p className="text-[11px] leading-relaxed">
-                        ใบเสร็จถูกออกแบบมาในขนาด <strong>ครึ่ง A4 (A5 แนวนอน 210 x 148.5 มม.)</strong> ประหยัดกระดาษ ดูเป็นมืออาชีพ มีชื่อที่พัก โลโก้ และเลขอ้างอิงครบถ้วน
+                        ใบเสร็จถูกออกแบบมาในขนาด <strong>ครึ่ง A4 (A5 แนวนอน 210 x 148.5 มม.)</strong> ประหยัดกระดาษ มีชื่อรีสอร์ท ที่อยู่ เบอร์โทร 098-1032870 เลขประจำตัวผู้เสียภาษี และรายการเงินมัดจำชัดเจน
                       </p>
                     </div>
                   </div>
@@ -369,11 +359,14 @@ export function ManualClient() {
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-2">
                   <ol className="list-decimal pl-4 space-y-1.5">
                     <li>แขกนำกุญแจมาคืนที่ฟรอนต์ → คลิกที่ห้องที่มีแถบ <strong>สีฟ้า (มีแขกพัก)</strong></li>
-                    <li>ตรวจสอบว่ามีค่าอาหาร/มินิบาร์ค้างชำระหรือไม่ หากมีให้เรียกเก็บเงิน</li>
+                    <li>ตรวจสอบว่ามีค่าอาหารหรือมินิบาร์ค้างชำระหรือไม่ หากมีให้เรียกเก็บเงิน</li>
                     <li>กดปุ่ม <strong>"ดำเนินการ Check-out"</strong></li>
-                    <li>ตรวจสอบช่อง <strong>"คืนมัดจำกุญแจ 200.-"</strong> เลือกว่าคืนเป็นเงินสดหรือโอนคืน</li>
+                    <li>กดปุ่ม <strong>"คืนมัดจำกุญแจ 200.-"</strong> (เลือกว่าคืนเงินสดหรือโอนคืน)</li>
                     <li>กดยืนยันเช็คเอาต์ → ห้องจะเปลี่ยนเป็น <strong>สีเหลือง (รอแม่บ้านทำความสะอาด)</strong> ทันที</li>
                   </ol>
+                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-900 text-[11px] font-semibold">
+                    ⚠️ สิ่งสำคัญ: อย่าลืมคืนเงินมัดจำกุญแจ 200 บาทให้ลูกค้าก่อนกดยืนยันเช็คเอาต์ทุกครั้ง
+                  </div>
                 </div>
               </div>
             </div>
@@ -398,7 +391,7 @@ export function ManualClient() {
                 </div>
               </div>
               <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-700/60 text-emerald-200 border border-emerald-500/40 hidden sm:inline-block">
-                ดูคิวทำความสะอาด • เปลี่ยนสถานะห้อง • เบิกของใช้
+                ดูคิวทำความสะอาดบนมือถือ • อัปเดตห้องพร้อมขาย • เบิกของใช้
               </span>
             </div>
 
@@ -414,11 +407,11 @@ export function ManualClient() {
                   <p className="text-xs text-slate-600 leading-relaxed">
                     แม่บ้านสามารถล็อกอินผ่านมือถือด้วยบัญชี <strong>housekeeping (รหัส: 1234)</strong> ระบบจะแสดงเฉพาะห้องที่แขกเพิ่งเช็คเอาต์ (สีเหลือง) แบบเรียลไทม์ โดยไม่ต้องรอให้ฟรอนต์โทรบอก
                   </p>
-                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1.5 text-xs text-emerald-950">
+                  <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1.5 text-xs text-emerald-950">
                     <div className="font-bold">✨ ขั้นตอนการทำงานหน้างาน:</div>
-                    <ul className="space-y-1 pl-1">
+                    <ul className="space-y-1.5 pl-1">
                       <li>• <strong>เดินไปที่ห้อง:</strong> กดปุ่มไอคอนเล่น ▶️ เพื่อแจ้งว่า <em>"กำลังทำความสะอาด"</em></li>
-                      <li>• <strong>ตรวจมินิบาร์:</strong> เช็คขนม เครื่องดื่ม และสิ่งของชำรุด</li>
+                      <li>• <strong>ตรวจมินิบาร์:</strong> เช็คขนม เครื่องดื่ม และสิ่งของชำรุดในห้องพัก</li>
                       <li>• <strong>ทำความสะอาดเสร็จ:</strong> กดปุ่มเครื่องหมายถูก ✔️ ห้องจะเด้งเป็น <strong>สีเขียว (พร้อมขาย)</strong> ให้ฟรอนต์เห็นทันที!</li>
                     </ul>
                   </div>
@@ -449,7 +442,7 @@ export function ManualClient() {
                   >
                     <img src="/manual-images/13-mobile-housekeeping.png" alt="หน้าแม่บ้านมือถือ" className="w-full h-auto object-cover group-hover:scale-[1.01] transition duration-200" />
                     <div className="p-2 text-[10px] font-semibold text-slate-700 bg-white border-t border-slate-200">
-                      📱 บนมือถือ
+                      📱 บนมือถือแม่บ้าน
                     </div>
                   </div>
                 </div>
@@ -460,7 +453,7 @@ export function ManualClient() {
                 <div className="flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">2</span>
                   <h3 className="text-sm font-bold text-slate-900">
-                    การเบิกของใช้ &amp; ผ้าปูที่นอน (เมนู: คลังของใช้ /supplies)
+                    การเบิกของใช้ &amp; ผ้าปูที่นอน (เมนู: เบิกของใช้ /supplies)
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
@@ -481,11 +474,11 @@ export function ManualClient() {
 
                   <div className="space-y-2 text-xs text-slate-700 leading-relaxed">
                     <p>
-                      เมื่อต้องการนำสบู่ ยาสระผม กระดาษทิชชู หรือชุดเครื่องนอนไปเติมในห้อง ให้เข้าเมนู <strong>"คลังของใช้"</strong>
+                      เมื่อต้องการนำสบู่ ยาสระผม กระดาษทิชชู หรือชุดเครื่องนอนไปเติมในห้องพัก ให้เข้าเมนู <strong>"เบิกของใช้"</strong>
                     </p>
                     <ul className="list-disc pl-4 space-y-1 text-slate-600">
                       <li>เลือกรายการสิ่งของที่ต้องการเบิก</li>
-                      <li>ใส่จำนวนที่เบิกไปใช้งาน</li>
+                      <li>ใส่จำนวนชิ้นที่เบิกไปใช้งาน</li>
                       <li>กดยืนยันเบิก → ยอดสต็อกคงเหลือในระบบจะลดลงอัตโนมัติ เพื่อให้ผู้จัดการสั่งซื้อของเพิ่มได้ทันท่วงที</li>
                     </ul>
                   </div>
@@ -513,7 +506,7 @@ export function ManualClient() {
                 </div>
               </div>
               <span className="text-xs px-2.5 py-1 rounded-full bg-amber-700/60 text-amber-200 border border-amber-500/40 hidden sm:inline-block">
-                ขายหน้าร้าน • โต๊ะอาหาร • สั่งลงบิลห้องพัก
+                ขายหน้าร้าน • ผังโต๊ะอาหาร • สั่งลงบิลห้องพัก (Room Charge)
               </span>
             </div>
 
@@ -523,13 +516,13 @@ export function ManualClient() {
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-full bg-amber-600 text-white text-xs font-bold flex items-center justify-center">1</span>
                     <h3 className="text-sm font-bold text-slate-900">
-                      การรับออเดอร์ &amp; เลือกโต๊ะอาหาร (เมนู: ห้องอาหาร/POS)
+                      การรับออเดอร์ &amp; ผังโต๊ะอาหาร (เมนู: ขาย POS)
                     </h3>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    หน้าจอ POS ถูกออกแบบมาให้แตะเลือกรายการอาหารและเครื่องดื่มได้สะดวกรวดเร็ว ทั้งจากคอมพิวเตอร์และแท็บเล็ต/มือถือ
+                    หน้าจอ POS ถูกออกแบบมาให้แตะเลือกรายการอาหารและเครื่องดื่มได้สะดวกรวดเร็ว ทั้งจากคอมพิวเตอร์และมือถือพนักงานเสิร์ฟ
                   </p>
-                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1.5 text-xs text-amber-950">
+                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 space-y-1.5 text-xs text-amber-950">
                     <div className="font-bold">ขั้นตอนการเปิดบิลอาหาร:</div>
                     <ol className="list-decimal pl-4 space-y-1">
                       <li>เลือกโต๊ะนั่ง (โต๊ะ T1–T6) หรือเลือก "ซื้อกลับบ้าน"</li>
@@ -589,7 +582,7 @@ export function ManualClient() {
                   <div className="p-3 rounded-lg bg-white border border-slate-200 space-y-1">
                     <strong className="text-slate-900">🏨 ลงบิลห้องพัก (Room Charge):</strong>
                     <p className="text-slate-600 text-[11px]">
-                      หากเป็นแขกที่พักในรีสอร์ท สามารถเลือก <em>"ลงบิลห้องพัก"</em> แล้วเลือกเลขห้อง (เช่น ห้อง 102) ยอดเงินจะถูกนำไปรวมในบิลของฟรอนต์อัตโนมัติเพื่อคิดเงินตอนเช็คเอาต์
+                      หากเป็นแขกที่พักในรีสอร์ท สามารถเลือก <em>"ลงบิลห้องพัก"</em> แล้วเลือกเลขห้อง (เช่น ห้อง 101) ยอดเงินจะถูกนำไปรวมในบิลของฟรอนต์อัตโนมัติเพื่อคิดเงินตอนเช็คเอาต์
                     </p>
                   </div>
                 </div>
@@ -599,72 +592,7 @@ export function ManualClient() {
         )}
 
         {/* ============================================================== */}
-        {/* ROLE 4: METERS & UTILITIES                                    */}
-        {/* ============================================================== */}
-        {(activeTab === "ALL" || activeTab === "METERS") && (
-          <section className="bg-white rounded-2xl border border-violet-200 shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-r from-violet-900 to-violet-800 text-white p-4 sm:p-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-violet-200 font-bold">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-[11px] font-semibold text-violet-300 uppercase tracking-wider">ตำแหน่งหน้าที่ 4</div>
-                  <h2 className="text-base sm:text-lg font-bold text-white">
-                    คู่มือเจ้าหน้าที่จดมิเตอร์น้ำ-ไฟ (ห้องพักรายเดือน)
-                  </h2>
-                </div>
-              </div>
-              <span className="text-xs px-2.5 py-1 rounded-full bg-violet-700/60 text-violet-200 border border-violet-500/40 hidden sm:inline-block">
-                มิเตอร์ไฟ • มิเตอร์น้ำ • คำนวณค่ายูนิตอัตโนมัติ
-              </span>
-            </div>
-
-            <div className="p-4 sm:p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                <div
-                  onClick={() => setPreviewImage({
-                    src: "/manual-images/07-meters.png",
-                    title: "หน้าจดมิเตอร์น้ำ-ไฟ (Meters Management)",
-                    desc: "หน้าบันทึกเลขอ่านมิเตอร์น้ำและไฟของแต่ละห้องพัก พร้อมคำนวณส่วนต่างยูนิตอัตโนมัติ",
-                  })}
-                  className="group relative rounded-xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition cursor-pointer bg-slate-100"
-                >
-                  <img src="/manual-images/07-meters.png" alt="หน้าจดมิเตอร์" className="w-full h-auto object-cover group-hover:scale-[1.01] transition duration-200" />
-                  <div className="p-2 text-[11px] font-semibold text-slate-700 bg-white border-t border-slate-200 flex justify-between">
-                    <span>ภาพ: หน้าบันทึกมิเตอร์น้ำ-ไฟ</span>
-                    <span className="text-violet-700">🔍 ดูรูปใหญ่</span>
-                  </div>
-                </div>
-
-                <div className="space-y-3 text-xs text-slate-700 leading-relaxed">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-violet-600 text-white text-xs font-bold flex items-center justify-center">1</span>
-                    <h3 className="text-sm font-bold text-slate-900">
-                      รอบการจดและการคำนวณ (เมนู: จดมิเตอร์น้ำ-ไฟ)
-                    </h3>
-                  </div>
-                  <p>
-                    สำหรับห้องพักรายเดือน เจ้าหน้าที่จะเดินจดมิเตอร์ทุกสิ้นเดือน หรือวันที่แขกย้ายออก
-                  </p>
-                  <div className="p-3 rounded-xl bg-violet-50 border border-violet-200 space-y-1.5 text-violet-950">
-                    <div className="font-bold">⚡ อัตราค่าบริการตามมาตรฐาน:</div>
-                    <ul className="space-y-1 pl-1 text-[11px]">
-                      <li>• <strong>ค่าไฟ:</strong> หน่วยละ 7 บาท (ระบบคำนวณ: <em>เลขครั้งนี้ - เลขครั้งก่อน × 7</em>)</li>
-                      <li>• <strong>ค่าน้ำ:</strong> หน่วยละ 18 บาท (ระบบคำนวณ: <em>เลขครั้งนี้ - เลขครั้งก่อน × 18</em>)</li>
-                    </ul>
-                  </div>
-                  <p className="text-[11px] text-slate-500">
-                    * เมื่อกดบันทึก ยอดค่าน้ำค่าไฟจะถูกส่งเข้าไปรวมในใบแจ้งหนี้ค่าห้องรายเดือนของห้องนั้นโดยอัตโนมัติ
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ============================================================== */}
-        {/* ROLE 5: OWNER & MANAGER                                       */}
+        {/* ROLE 4: OWNER & MANAGER                                       */}
         {/* ============================================================== */}
         {(activeTab === "ALL" || activeTab === "MANAGER") && (
           <section className="bg-white rounded-2xl border border-rose-200 shadow-sm overflow-hidden">
@@ -674,14 +602,14 @@ export function ManualClient() {
                   <Shield className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-[11px] font-semibold text-rose-300 uppercase tracking-wider">ตำแหน่งหน้าที่ 5</div>
+                  <div className="text-[11px] font-semibold text-rose-300 uppercase tracking-wider">ตำแหน่งหน้าที่ 4</div>
                   <h2 className="text-base sm:text-lg font-bold text-white">
                     คู่มือเจ้าของกิจการ &amp; ผู้จัดการ (Owner / Manager)
                   </h2>
                 </div>
               </div>
               <span className="text-xs px-2.5 py-1 rounded-full bg-rose-800/60 text-rose-200 border border-rose-500/40 hidden sm:inline-block">
-                รายงานสรุปยอด • การเงิน • ตั้งค่านโยบาย • บัญชีพนักงาน
+                รายงานสรุปยอด • การเงิน • ตั้งค่านโยบาย • บัญชีพนักงาน • Audit Log
               </span>
             </div>
 
@@ -715,9 +643,9 @@ export function ManualClient() {
                   </div>
 
                   <div className="space-y-2.5 text-xs text-slate-700 leading-relaxed">
-                    <div className="p-3 rounded-xl bg-rose-50/70 border border-rose-200 space-y-1.5 text-rose-950">
+                    <div className="p-3.5 rounded-xl bg-rose-50/70 border border-rose-200 space-y-1.5 text-rose-950">
                       <div className="font-bold">📊 รายละเอียดในรายงาน:</div>
-                      <ul className="space-y-1 pl-1 text-[11px]">
+                      <ul className="space-y-1.5 pl-1 text-[11px]">
                         <li>• <strong>แยกประเภทการชำระ:</strong> เงินสดในเก๊ะ vs เงินโอนเข้าบัญชีธนาคารชัดเจน</li>
                         <li>• <strong>ช่วงเวลา:</strong> เลือกดู "วันนี้", "7 วันล่าสุด", "เดือนนี้" หรือ "ทั้งหมด"</li>
                         <li>• <strong>มัดจำกุญแจ:</strong> ยอดรับเข้า, ยอดคืน และยอดที่ถือรอคืน ป้องกันเงินสูญหาย</li>
@@ -738,13 +666,13 @@ export function ManualClient() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                   <div className="space-y-2.5 text-xs text-slate-700 leading-relaxed">
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
                       <div className="font-bold text-slate-900">⚙️ สิ่งที่ผู้จัดการสามารถปรับแต่งได้:</div>
-                      <ul className="space-y-1 pl-1 text-[11px] text-slate-600">
-                        <li>• <strong>ราคาห้องพัก:</strong> ปรับราคามาตรฐานรายวัน รายเดือน และชั่วคราว</li>
-                        <li>• <strong>ค่าน้ำ-ไฟ:</strong> ปรับอัตราหน่วยค่าน้ำและค่าไฟฟ้า</li>
+                      <ul className="space-y-1.5 pl-1 text-[11px] text-slate-600">
+                        <li>• <strong>ราคาห้องพักรายวัน:</strong> ปรับราคามาตรฐานรายวัน และค่ามัดจำกุญแจ</li>
+                        <li>• <strong>ข้อมูลที่พัก:</strong> แก้ไขชื่อรีสอร์ท ที่อยู่ เบอร์โทร เลขผู้เสียภาษีบนใบเสร็จ</li>
                         <li>• <strong>จัดการพนักงาน:</strong> เพิ่มบัญชีพนักงานใหม่ หรือรีเซ็ตรหัสผ่าน</li>
-                        <li>• <strong>ตรวจสอบ Audit Log:</strong> ดูย้อนหลังได้ว่าใครเปิดห้อง ลบบิล หรือแก้ไขข้อมูลเวลาใด</li>
+                        <li>• <strong>ตรวจสอบ Audit Log:</strong> ดูย้อนหลังได้ว่าใครเปิดห้อง ลบบิล หรือแก้ไขข้อมูลเวลาใด ป้องกันการทุจริต 100%</li>
                       </ul>
                     </div>
                   </div>

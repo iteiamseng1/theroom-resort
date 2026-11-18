@@ -22,7 +22,6 @@ const imgBilling = getBase64Image("04-billing.png");
 const imgPos = getBase64Image("05-pos.png");
 const imgHousekeeping = getBase64Image("06-housekeeping.png");
 const imgMobileHk = getBase64Image("13-mobile-housekeeping.png");
-const imgMeters = getBase64Image("07-meters.png");
 const imgSupplies = getBase64Image("08-supplies.png");
 const imgReports = getBase64Image("09-reports.png");
 const imgSettings = getBase64Image("10-settings.png");
@@ -31,7 +30,7 @@ const htmlContent = `<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>คู่มือการปฏิบัติงานระบบ TheRoom Resort ชุมแพ (แยกตามตำแหน่งงาน)</title>
+  <title>คู่มือการปฏิบัติงานระบบ TheRoom Resort ชุมแพ</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
 
@@ -107,7 +106,7 @@ const htmlContent = `<!DOCTYPE html>
 
     /* Section & Cards */
     .section-title {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 700;
       color: #2D160B;
       margin: 0 0 8px 0;
@@ -129,7 +128,6 @@ const htmlContent = `<!DOCTYPE html>
     .badge-front { background: #0284c7; }
     .badge-hk { background: #059669; }
     .badge-pos { background: #d97706; }
-    .badge-meter { background: #7c3aed; }
     .badge-admin { background: #e11d48; }
 
     .accounts-grid {
@@ -155,7 +153,7 @@ const htmlContent = `<!DOCTYPE html>
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .step-box {
@@ -264,9 +262,9 @@ const htmlContent = `<!DOCTYPE html>
       <div class="header-banner">
         <div class="header-left">
           <h1>TheRoom Resort ชุมแพ — คู่มือการใช้งานระบบ (SOP)</h1>
-          <p>คู่มือการปฏิบัติงานแยกตามตำแหน่งหน้าที่ พร้อมภาพหน้าจอระบบจริง</p>
+          <p>ระบบบริหารโรงแรม & ห้องอาหาร POS (ห้องพักรายวัน 450.-/คืน)</p>
         </div>
-        <div class="header-badge">หน้า 1 / 3 • พนักงานต้อนรับ</div>
+        <div class="header-badge">หน้า 1 / 2 • พนักงานต้อนรับ</div>
       </div>
 
       <div class="accounts-grid">
@@ -298,6 +296,7 @@ const htmlContent = `<!DOCTYPE html>
           <span class="step-num">1</span><span class="step-title">ผังห้องพัก 28 ห้อง (/front-desk)</span>
           <div class="step-desc">
             • ตรวจดูห้องว่างแบบเรียลไทม์ (โซน 1: 101–106, โซน 2: 201–206)<br>
+            • ราคามาตรฐาน <strong>450 บาท/คืน</strong> ทุกห้อง<br>
             • กรองสถานะได้จากแถบด้านบน (ทั้งหมด / พร้อม / มีแขกพัก / ทำความสะอาด)
           </div>
           <div class="img-card">
@@ -308,10 +307,12 @@ const htmlContent = `<!DOCTYPE html>
 
         <!-- Step 2 -->
         <div class="step-box">
-          <span class="step-num">2</span><span class="step-title">การเปิดห้อง / เช็คอิน (Check-in)</span>
+          <span class="step-num">2</span><span class="step-title">การเปิดห้องพักรายวัน (Check-in)</span>
           <div class="step-desc">
-            • คลิกห้อง <strong>สีเขียว (VC)</strong> → เลือกประเภท: รายวัน (450.-), ชั่วคราว 3 ชม. (400.-) หรือรายเดือน (3,500.-)<br>
-            • ใส่ชื่อและเบอร์โทร → เก็บค่าห้อง + มัดจำกุญแจ 200.-
+            • คลิกห้อง <strong>สีเขียว (VC)</strong><br>
+            • ใส่ชื่อและเบอร์โทรศัพท์ผู้เข้าพัก<br>
+            • ระบบคิดค่าห้อง 450.- + <strong>มัดจำกุญแจ 200.-</strong> (รวม 650.-) ให้อัตโนมัติ<br>
+            • เลือกว่ารับเงินสด หรือ สแกน QR โอนเงิน แล้วกดยืนยันเปิดห้อง
           </div>
           <div class="img-card">
             <img src="${imgCheckinModal}" alt="หน้าต่างเช็คอิน">
@@ -323,9 +324,9 @@ const htmlContent = `<!DOCTYPE html>
         <div class="step-box">
           <span class="step-num">3</span><span class="step-title">การคิดเงิน & พิมพ์ใบเสร็จ (/billing)</span>
           <div class="step-desc">
-            • รับเงินสด หรือ สแกน QR โอนเงิน<br>
+            • เข้าเมนู "รับชำระ" ตรวจสอบรายการบิลแต่ละห้อง<br>
             • กดไอคอนเครื่องพิมพ์เพื่อออกใบเสร็จขนาด <strong>ครึ่ง A4 (A5 แนวนอน)</strong><br>
-            • รองรับการย้ายห้องและต่อเวลาพักอัตโนมัติ
+            • มีหัวบิล TheRoom Resort ชุมแพ โทร. 098-1032870 ครบถ้วน
           </div>
           <div class="img-card">
             <img src="${imgBilling}" alt="หน้ารับชำระ">
@@ -342,7 +343,7 @@ const htmlContent = `<!DOCTYPE html>
             • กดปุ่มคืนมัดจำกุญแจ [200.-] → กดยืนยัน ห้องจะกลายเป็น <strong>สีเหลือง (รอแม่บ้าน)</strong> ทันที
           </div>
           <div class="alert-box">
-            ⚠️ <strong>ข้อควรระวัง:</strong> อย่าลืมคืนเงินมัดจำกุญแจ 200 บาทให้แขกก่อนกดยืนยันเช็คเอาต์
+            ⚠️ <strong>ข้อควรระวัง:</strong> อย่าลืมคืนเงินมัดจำกุญแจ 200 บาทให้แขกก่อนกดยืนยันเช็คเอาต์ทุกครั้ง
           </div>
         </div>
       </div>
@@ -350,19 +351,19 @@ const htmlContent = `<!DOCTYPE html>
 
     <div class="footer">
       <span>TheRoom Resort ชุมแพ • คู่มือระบบบริหารจัดการโรงแรม</span>
-      <span>หน้า 1 จาก 3</span>
+      <span>หน้า 1 จาก 2</span>
     </div>
   </div>
 
-  <!-- ================= PAGE 2: HOUSEKEEPING & POS ================= -->
+  <!-- ================= PAGE 2: HOUSEKEEPING, POS & MANAGER ================= -->
   <div class="page">
     <div>
       <div class="header-banner">
         <div class="header-left">
           <h1>TheRoom Resort ชุมแพ — คู่มือการใช้งานระบบ (SOP)</h1>
-          <p>แผนกแม่บ้าน & ซ่อมบำรุง และร้านอาหาร / มินิบาร์ POS</p>
+          <p>แผนกแม่บ้าน & ซ่อมบำรุง, ร้านอาหาร/มินิบาร์ POS และผู้บริหาร</p>
         </div>
-        <div class="header-badge">หน้า 2 / 3 • แม่บ้าน & POS</div>
+        <div class="header-badge">หน้า 2 / 2 • แม่บ้าน • POS • ผู้บริหาร</div>
       </div>
 
       <!-- Housekeeping Section -->
@@ -374,9 +375,9 @@ const htmlContent = `<!DOCTYPE html>
         <div class="step-box">
           <span class="step-num">1</span><span class="step-title">ดูคิวทำความสะอาดบนมือถือ (/housekeeping)</span>
           <div class="step-desc">
-            • ล็อกอิน <strong>housekeeping / 1234</strong> ผ่านมือถือ<br>
-            • ห้องที่แขกเช็คเอาต์จะขึ้นเป็นสีเหลืองทันที<br>
-            • เดินไปถึงห้อง กดปุ่มไอคอนเล่น ▶️ เพื่อแจ้งว่ากำลังเข้าทำความสะอาด
+            • ล็อกอิน <strong>housekeeping / 1234</strong> ผ่านมือถือ ห้องที่เช็คเอาต์จะขึ้นเป็นสีเหลืองทันที<br>
+            • เดินไปถึงห้อง กดปุ่มไอคอนเล่น ▶️ เพื่อแจ้งว่ากำลังเข้าทำความสะอาด<br>
+            • ตรวจเช็คสิ่งของมินิบาร์ และความเสียหายในห้อง
           </div>
           <div class="img-card">
             <img src="${imgMobileHk}" alt="แม่บ้านมือถือ">
@@ -385,21 +386,20 @@ const htmlContent = `<!DOCTYPE html>
         </div>
 
         <div class="step-box">
-          <span class="step-num">2</span><span class="step-title">ตรวจมินิบาร์ & กดเสร็จสิ้นห้องพร้อมขาย</span>
+          <span class="step-num">2</span><span class="step-title">กดเสร็จสิ้นห้องพร้อมขาย & เบิกของใช้ (/supplies)</span>
           <div class="step-desc">
-            • ตรวจเช็คเครื่องดื่ม ขนม และสิ่งของชำรุด<br>
-            • ทำความสะอาดเสร็จ ปูเตียงเรียบร้อย กดปุ่มเครื่องหมายถูก ✔️<br>
-            • ห้องจะเด้งเป็น <strong>สีเขียว (พร้อมขาย)</strong> ให้ฟรอนต์เห็นทันทีโดยไม่ต้องโทรบอก
+            • ทำความสะอาดเสร็จ ปูเตียงเรียบร้อย กดปุ่มเครื่องหมายถูก ✔️ ห้องจะเด้งเป็น <strong>สีเขียว (พร้อมขาย)</strong> ให้ฟรอนต์เห็นทันที<br>
+            • เบิกสบู่ แชมพู ทิชชู ผ้าปูที่นอน ระบบจะตัดสต็อกกลางให้อัตโนมัติ
           </div>
           <div class="img-card">
-            <img src="${imgHousekeeping}" alt="แม่บ้านเดสก์ท็อป">
-            <div class="img-caption">ภาพที่ 5: หน้ารายการงานทำความสะอาด</div>
+            <img src="${imgSupplies}" alt="คลังของใช้">
+            <div class="img-caption">ภาพที่ 5: คลังของใช้และของในห้องพัก</div>
           </div>
         </div>
       </div>
 
       <!-- POS Section -->
-      <div class="section-title" style="margin-top: 10px;">
+      <div class="section-title" style="margin-top: 6px;">
         <span class="role-badge badge-pos">ตำแหน่งที่ 3</span> แคชเชียร์ & ร้านอาหาร / มินิบาร์ (POS)
       </div>
 
@@ -428,88 +428,35 @@ const htmlContent = `<!DOCTYPE html>
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="footer">
-      <span>TheRoom Resort ชุมแพ • คู่มือระบบบริหารจัดการโรงแรม</span>
-      <span>หน้า 2 จาก 3</span>
-    </div>
-  </div>
-
-  <!-- ================= PAGE 3: METERS & MANAGER ================= -->
-  <div class="page">
-    <div>
-      <div class="header-banner">
-        <div class="header-left">
-          <h1>TheRoom Resort ชุมแพ — คู่มือการใช้งานระบบ (SOP)</h1>
-          <p>งานจดมิเตอร์น้ำ-ไฟ และผู้บริหาร/เจ้าของกิจการ (Owner / Manager)</p>
-        </div>
-        <div class="header-badge">หน้า 3 / 3 • จดมิเตอร์ & ผู้บริหาร</div>
-      </div>
-
-      <!-- Meters Section -->
-      <div class="section-title">
-        <span class="role-badge badge-meter">ตำแหน่งที่ 4</span> เจ้าหน้าที่จดมิเตอร์น้ำ-ไฟ (ห้องพักรายเดือน)
-      </div>
-
-      <div class="step-grid">
-        <div class="step-box">
-          <span class="step-num">1</span><span class="step-title">การบันทึกเลขอ่านมิเตอร์ (/meters)</span>
-          <div class="step-desc">
-            • จดมิเตอร์ทุกสิ้นเดือน หรือวันที่แขกรายเดือนย้ายออก<br>
-            • กรอกเลขมิเตอร์ไฟ และมิเตอร์น้ำครั้งนี้<br>
-            • <strong>ค่าไฟ:</strong> หน่วยละ 7 บาท | <strong>ค่าน้ำ:</strong> หน่วยละ 18 บาท<br>
-            • ระบบจะคำนวณส่วนต่างยูนิตและส่งยอดไปรวมในบิลรายเดือนอัตโนมัติ
-          </div>
-          <div class="img-card">
-            <img src="${imgMeters}" alt="จดมิเตอร์น้ำไฟ">
-            <div class="img-caption">ภาพที่ 7: หน้าบันทึกเลขอ่านมิเตอร์น้ำ-ไฟ</div>
-          </div>
-        </div>
-
-        <div class="step-box">
-          <span class="step-num">2</span><span class="step-title">คลังของใช้ & เบิกจ่าย (/supplies)</span>
-          <div class="step-desc">
-            • แม่บ้าน/ช่าง เบิกสบู่ แชมพู ทิชชู หลอดไฟ ผ้าปูที่นอน<br>
-            • ระบุจำนวนชิ้นที่นำไปใช้ สต็อกกลางจะตัดยอดเรียลไทม์<br>
-            • ป้องกันของใช้สูญหายและแจ้งเตือนเมื่อของใกล้หมด
-          </div>
-          <div class="img-card">
-            <img src="${imgSupplies}" alt="คลังของใช้">
-            <div class="img-caption">ภาพที่ 8: คลังของใช้และของในห้องพัก</div>
-          </div>
-        </div>
-      </div>
 
       <!-- Owner & Manager Section -->
-      <div class="section-title" style="margin-top: 10px;">
-        <span class="role-badge badge-admin">ตำแหน่งที่ 5</span> เจ้าของกิจการ & ผู้จัดการ (Owner / Manager)
+      <div class="section-title" style="margin-top: 6px;">
+        <span class="role-badge badge-admin">ตำแหน่งที่ 4</span> เจ้าของกิจการ & ผู้จัดการ (Owner / Manager)
       </div>
 
       <div class="step-grid">
         <div class="step-box">
-          <span class="step-num">3</span><span class="step-title">รายงานสรุปยอดรายได้ (/reports)</span>
+          <span class="step-num">5</span><span class="step-title">รายงานสรุปยอดรายได้ (/reports)</span>
           <div class="step-desc">
             • ดูยอดรายรับสุทธิ สัดส่วน <strong>เงินสด vs เงินโอน</strong><br>
-            • ตรวจสอบยอดขายห้องพัก, ยอดขาย POS, ยอดค้างชำระ<br>
-            • ตรวจสอบยอดมัดจำกุญแจ (รับเข้า/คืน/ถือรอคืน)
+            • ตรวจสอบยอดขายห้องพัก, ยอดขาย POS, ยอดมัดจำกุญแจ (รับเข้า/คืน/ถือรอคืน)
           </div>
           <div class="img-card">
             <img src="${imgReports}" alt="รายงานยอดขาย">
-            <div class="img-caption">ภาพที่ 9: แดชบอร์ดรายงานการเงินสรุปยอด</div>
+            <div class="img-caption">ภาพที่ 7: แดชบอร์ดรายงานการเงินสรุปยอด</div>
           </div>
         </div>
 
         <div class="step-box">
-          <span class="step-num">4</span><span class="step-title">ตั้งค่าระบบ & ประวัติ Audit Log (/settings)</span>
+          <span class="step-num">6</span><span class="step-title">ตั้งค่าระบบ & ประวัติ Audit Log (/settings)</span>
           <div class="step-desc">
-            • ปรับราคาห้องพัก, อัตราค่าน้ำ-ไฟ, ค่ามัดจำกุญแจ<br>
+            • ปรับราคาห้องพักรายวัน, ข้อมูลรีสอร์ท, ค่ามัดจำกุญแจ<br>
             • เพิ่ม/ลบบัญชีพนักงาน, อนุมัติรหัสผ่านกรณีพนักงานลืมรหัส<br>
             • <strong>Audit Log:</strong> บันทึกประวัติย้อนหลังว่าใครทำรายการอะไร ป้องกันการทุจริต 100%
           </div>
           <div class="img-card">
             <img src="${imgSettings}" alt="ตั้งค่าระบบ">
-            <div class="img-caption">ภาพที่ 10: เมนูตั้งค่านโยบายและบัญชีผู้ใช้</div>
+            <div class="img-caption">ภาพที่ 8: เมนูตั้งค่านโยบายและบัญชีผู้ใช้</div>
           </div>
         </div>
       </div>
@@ -517,7 +464,7 @@ const htmlContent = `<!DOCTYPE html>
 
     <div class="footer">
       <span>TheRoom Resort ชุมแพ • คู่มือระบบบริหารจัดการโรงแรม</span>
-      <span>หน้า 3 จาก 3</span>
+      <span>หน้า 2 จาก 2</span>
     </div>
   </div>
 
