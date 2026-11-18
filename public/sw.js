@@ -1,4 +1,4 @@
-const BUILD_VERSION = "2026.11.18-v14";
+const BUILD_VERSION = "2026.11.18-v15";
 const CACHE_NAME = `theroom-resort-${BUILD_VERSION}`;
 
 self.addEventListener("install", (event) => {

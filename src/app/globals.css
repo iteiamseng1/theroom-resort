@@ -18,8 +18,8 @@ body {
   z-index: 50;
   width: 100%;
   background-color: #2D160B;
-  /* Set to exactly 4mm to clear iOS status bar blur radius */
-  padding-top: calc(env(safe-area-inset-top, 20px) + 4mm);
+  /* Set to exactly 5mm to clear iOS status bar blur radius */
+  padding-top: calc(env(safe-area-inset-top, 20px) + 5mm);
   border-bottom: 1px solid rgba(200, 155, 53, 0.25);
   /* Hardware layer isolation to remove iOS status bar blur effect */
   isolation: isolate;
