@@ -51,6 +51,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${notoThai.variable} h-full bg-[#2D160B] antialiased`}
     >
       <body className="min-h-full bg-[#2D160B] text-slate-900 font-sans">
+        {/* iOS PWA top status bar solid anchor (prevents WebKit glass blur bleed) */}
+        <div
+          className="no-print fixed top-0 inset-x-0 h-[env(safe-area-inset-top,0px)] bg-[#2D160B] z-[99999] pointer-events-none"
+          aria-hidden="true"
+        />
         <ServiceWorkerRegistrar />
         {children}
       </body>
