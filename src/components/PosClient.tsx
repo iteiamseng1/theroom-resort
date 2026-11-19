@@ -116,6 +116,7 @@ export function PosClient({
   vatRate,
   serviceRate,
   userRole = "FRONT_DESK",
+  canVoidPos = false,
   propertySetting,
 }: {
   initialCategories: Category[];
@@ -125,6 +126,7 @@ export function PosClient({
   vatRate: number;
   serviceRate: number;
   userRole?: string;
+  canVoidPos?: boolean;
   propertySetting?: {
     hotelName: string;
     address: string;
@@ -351,7 +353,7 @@ export function PosClient({
 
   function canVoidOrder(order: PosOrder) {
     if (order.status === "CANCELLED") return false;
-    return ["OWNER", "MANAGER", "ADMIN"].includes(userRole);
+    return canVoidPos || ["OWNER", "ADMIN"].includes(userRole);
   }
 
   async function handleVoidOrder() {

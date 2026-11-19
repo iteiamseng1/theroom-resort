@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { resolveAllowedMenus, UserRole } from "@/lib/roles";
 import { calculateTaxAndService } from "@/lib/pms-math";
 import { getThaiDatePrefix, nextDailySeqNumber } from "@/lib/doc-number";
 
@@ -303,10 +304,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "กรุณาระบุเหตุผลในการยกเลิกบิล" }, { status: 400 });
     }
 
-    const isAdminOrManager = ["OWNER", "MANAGER", "ADMIN"].includes(user.role);
-    if (!isAdminOrManager) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { role: true, allowedMenus: true, active: true },
+    });
+    if (!dbUser || !dbUser.active) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const allowedMenus = resolveAllowedMenus(dbUser.role as UserRole, dbUser.allowedMenus);
+    const hasVoidPermission =
+      ["OWNER", "ADMIN"].includes(dbUser.role) || allowedMenus.includes("/pos/void");
+    if (!hasVoidPermission) {
       return NextResponse.json(
-        { error: "เฉพาะ Admin / Manager เท่านั้นที่มีสิทธิ์ยกเลิกบิล POS" },
+        { error: "คุณไม่มีสิทธิ์ยกเลิกบิล POS (กรุณาติดต่อ Admin เพื่อเปิดสิทธิ์)" },
         { status: 403 }
       );
     }

@@ -48,6 +48,7 @@ export default async function PosPage() {
         vatRate={setting?.vatRate ?? 7}
         serviceRate={setting?.serviceChargeRate ?? 0}
         userRole={user.role}
+        canVoidPos={user.role === "OWNER" || Boolean(user.allowedMenus?.includes("/pos/void"))}
         propertySetting={{
           hotelName: setting?.hotelName || hotelName,
           address: setting?.address || "",

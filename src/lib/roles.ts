@@ -54,6 +54,11 @@ export const MENU_DEFINITIONS: MenuPermissionDef[] = [
     label: "ขาย POS",
     defaultRoles: ["OWNER", "MANAGER", "FRONT_DESK", "POS_CASHIER", "KITCHEN"],
   },
+  {
+    href: "/pos/void",
+    label: "ยกเลิกบิล POS",
+    defaultRoles: ["OWNER", "MANAGER"],
+  },
   // 2. แม่บ้าน & คลังสินค้า
   {
     href: "/housekeeping",
