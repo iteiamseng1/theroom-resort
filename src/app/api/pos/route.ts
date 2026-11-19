@@ -304,9 +304,11 @@ export async function POST(req: NextRequest) {
     }
 
     const isAdminOrManager = ["OWNER", "MANAGER", "ADMIN"].includes(user.role);
-    const isFrontOrCashier = ["FRONT_DESK", "POS_CASHIER"].includes(user.role);
-    if (!isAdminOrManager && !isFrontOrCashier) {
-      return NextResponse.json({ error: "คุณไม่มีสิทธิ์ยกเลิกบิล POS" }, { status: 403 });
+    if (!isAdminOrManager) {
+      return NextResponse.json(
+        { error: "เฉพาะ Admin / Manager เท่านั้นที่มีสิทธิ์ยกเลิกบิล POS" },
+        { status: 403 }
+      );
     }
 
     const existing = await prisma.posOrder.findUnique({
@@ -321,18 +323,6 @@ export async function POST(req: NextRequest) {
     }
     if (existing.status === "CANCELLED") {
       return NextResponse.json({ error: "บิลนี้ถูกยกเลิกไปแล้ว" }, { status: 400 });
-    }
-
-    if (!isAdminOrManager) {
-      const bangkokFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" });
-      const todayStr = bangkokFmt.format(new Date());
-      const orderDateStr = bangkokFmt.format(existing.createdAt);
-      if (orderDateStr !== todayStr) {
-        return NextResponse.json(
-          { error: "พนักงานสามารถยกเลิกได้เฉพาะบิลของวันนี้เท่านั้น (บิลย้อนหลังกรุณาติดต่อ Admin)" },
-          { status: 403 }
-        );
-      }
     }
 
     if (existing.status === "CHARGED_TO_ROOM" && existing.stay && existing.stay.status !== "CHECKED_IN") {

@@ -340,12 +340,7 @@ export function PosClient({
 
   function canVoidOrder(order: PosOrder) {
     if (order.status === "CANCELLED") return false;
-    if (["OWNER", "MANAGER", "ADMIN"].includes(userRole)) return true;
-    if (["FRONT_DESK", "POS_CASHIER"].includes(userRole)) {
-      const fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" });
-      return fmt.format(new Date(order.createdAt)) === fmt.format(new Date());
-    }
-    return false;
+    return ["OWNER", "MANAGER", "ADMIN"].includes(userRole);
   }
 
   async function handleVoidOrder() {
@@ -1069,10 +1064,10 @@ export function PosClient({
                             </button>
                           ) : (
                             <span
-                              title="บิลย้อนหลังกรุณาติดต่อ Admin เพื่อยกเลิก"
+                              title="เฉพาะ Admin / Manager เท่านั้นที่มีสิทธิ์ยกเลิกบิล"
                               className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-400 text-[11px] font-medium cursor-not-allowed"
                             >
-                              บิลย้อนหลัง (ติดต่อ Admin)
+                              ยกเลิกบิลติดต่อ Admin
                             </span>
                           )}
                         </>
