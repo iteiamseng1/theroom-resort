@@ -55,8 +55,8 @@ export const MENU_DEFINITIONS: MenuPermissionDef[] = [
     defaultRoles: ["OWNER", "MANAGER", "FRONT_DESK", "POS_CASHIER", "KITCHEN"],
   },
   {
-    href: "/pos/void",
-    label: "ยกเลิกบิล POS",
+    href: "/void",
+    label: "ยกเลิก",
     defaultRoles: ["OWNER", "MANAGER"],
   },
   // 2. แม่บ้าน & คลังสินค้า
@@ -114,4 +114,12 @@ export function resolveAllowedMenus(
     }
   }
   return getDefaultMenusForRole(role);
+}
+
+export function hasVoidPermission(
+  role: UserRole | string,
+  allowedMenus?: string[]
+): boolean {
+  if (role === "OWNER" || role === "ADMIN") return true;
+  return Boolean(allowedMenus?.includes("/void") || allowedMenus?.includes("/pos/void"));
 }

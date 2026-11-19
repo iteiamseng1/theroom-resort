@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ResortLogo } from "@/components/ResortLogo";
 import { ThaiCalendarPicker } from "@/components/ThaiCalendarPicker";
+import { VoidConfirmModal } from "@/components/VoidConfirmModal";
 import {
   ArrowRightLeft,
+  Ban,
   BedDouble,
   CalendarPlus,
   CheckCircle2,
@@ -93,10 +95,12 @@ interface GuestSuggestion {
 export function FrontDeskClient({
   initialRooms,
   initialGuests = [],
+  canVoid = false,
   propertySetting,
 }: {
   initialRooms: RoomItem[];
   initialGuests?: GuestSuggestion[];
+  canVoid?: boolean;
   propertySetting?: {
     hotelName: string;
     address: string;
@@ -167,6 +171,13 @@ export function FrontDeskClient({
   const [showMaintForm, setShowMaintForm] = useState(false);
   const [sendingCleaning, setSendingCleaning] = useState(false);
   const [cleaningToast, setCleaningToast] = useState<string | null>(null);
+  const [voidStayTarget, setVoidStayTarget] = useState<{
+    stay: RoomItem["stays"][number];
+    roomNumber: string;
+  } | null>(null);
+  const [voidReason, setVoidReason] = useState("");
+  const [voidSubmitting, setVoidSubmitting] = useState(false);
+  const [voidError, setVoidError] = useState("");
 
   // Quick Payment & Receipt in Room Modal
   const [payStayId, setPayStayId] = useState<string | null>(null);
@@ -863,6 +874,19 @@ export function FrontDeskClient({
                                 <ClipboardCheck className="w-3.5 h-3.5" />
                               )}
                               {sendingCleaning ? "กำลังแจ้ง..." : "ส่งทำความสะอาด"}
+                            </button>
+                          )}
+                          {canVoid && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setVoidStayTarget({ stay, roomNumber: selectedRoom.roomNumber });
+                                setVoidReason("");
+                                setVoidError("");
+                              }}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold"
+                            >
+                              <Ban className="w-3.5 h-3.5" /> ยกเลิกห้อง (Void)
                             </button>
                           )}
                         </>
@@ -1880,6 +1904,65 @@ export function FrontDeskClient({
           </button>
         </div>
       )}
+
+      <VoidConfirmModal
+        open={Boolean(voidStayTarget)}
+        title="ยกเลิกห้องพัก / ยกเลิกเช็คอิน (Void)"
+        subtitle={
+          voidStayTarget
+            ? `ห้อง ${voidStayTarget.roomNumber} · ${voidStayTarget.stay.bookingCode} (${voidStayTarget.stay.guest.fullName})`
+            : ""
+        }
+        effects={[
+          "เปลี่ยนสถานะห้องพักกลับเป็น ว่างสะอาด (VC)",
+          "ยกเลิกบิลห้องพัก (Folio) และยอดเงินมัดจำ/ยอดรับเงินของบิลนี้ออกจากรายงาน",
+          "บันทึกประวัติผู้ยกเลิกและเหตุผลลงใน Audit Log",
+        ]}
+        presets={[
+          "เปิดผิดห้อง",
+          "คีย์ข้อมูลผู้เข้าพักผิด",
+          "ลูกค้ายกเลิก/เปลี่ยนใจ",
+        ]}
+        reason={voidReason}
+        onReasonChange={setVoidReason}
+        error={voidError}
+        submitting={voidSubmitting}
+        onClose={() => setVoidStayTarget(null)}
+        onConfirm={async () => {
+          if (!voidStayTarget) return;
+          const reason = voidReason.trim();
+          if (!reason) {
+            setVoidError("กรุณาระบุเหตุผลในการยกเลิกห้องพัก");
+            return;
+          }
+          setVoidSubmitting(true);
+          setVoidError("");
+          try {
+            const res = await fetch("/api/stays", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                stayId: voidStayTarget.stay.id,
+                action: "VOID_STAY",
+                reason,
+              }),
+            });
+            if (res.ok) {
+              setVoidStayTarget(null);
+              setVoidReason("");
+              setSelectedRoom(null);
+              await refreshRooms();
+            } else {
+              const err = await res.json();
+              setVoidError(err.error || "ยกเลิกห้องพักไม่สำเร็จ");
+            }
+          } catch {
+            setVoidError("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+          } finally {
+            setVoidSubmitting(false);
+          }
+        }}
+      />
     </>
   );
 }

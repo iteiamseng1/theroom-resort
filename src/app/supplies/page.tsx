@@ -2,6 +2,7 @@ import { AppShell } from "@/components/AppShell";
 import { SuppliesClient } from "@/components/SuppliesClient";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/require-session";
+import { hasVoidPermission } from "@/lib/roles";
 
 export default async function SuppliesPage() {
   const { user, hotelName } = await requireSession([
@@ -36,6 +37,7 @@ export default async function SuppliesPage() {
         initialItems={items}
         initialMovements={serializedMovements}
         roomNumbers={rooms.map((r) => r.roomNumber)}
+        canVoid={hasVoidPermission(user.role, user.allowedMenus)}
       />
     </AppShell>
   );

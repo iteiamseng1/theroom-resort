@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { verifyVoidPermission } from "@/lib/void-auth";
 import { getThaiDatePrefix, nextDailySeqNumber } from "@/lib/doc-number";
 
 export type UnifiedUsageType = "SALE" | "ISSUE" | "BOTH";
@@ -535,6 +536,95 @@ export async function POST(req: NextRequest) {
       history,
       receipt: history[0] ?? null,
     });
+  }
+
+  if (body.action === "VOID_RECEIVE") {
+    const hasVoid = await verifyVoidPermission(user.id);
+    if (!hasVoid) {
+      return NextResponse.json(
+        { error: "คุณไม่มีสิทธิ์ยกเลิกใบรับสินค้า (กรุณาติดต่อ Admin เพื่อเปิดสิทธิ์)" },
+        { status: 403 }
+      );
+    }
+
+    const { auditLogId, reason } = body as { auditLogId?: string; reason?: string };
+    const cleanReason = String(reason ?? "").trim();
+    if (!auditLogId) {
+      return NextResponse.json({ error: "ไม่พบใบรับสินค้าที่ต้องการยกเลิก" }, { status: 400 });
+    }
+    if (!cleanReason) {
+      return NextResponse.json({ error: "กรุณาระบุเหตุผลในการยกเลิกใบรับ" }, { status: 400 });
+    }
+
+    try {
+      await prisma.$transaction(async (tx) => {
+        const log = await tx.auditLog.findUnique({ where: { id: auditLogId } });
+        if (!log || log.action !== "STOCK_RECEIVE") {
+          throw new Error("ไม่พบใบรับสินค้า หรือใบรับนี้ถูกยกเลิกไปแล้ว");
+        }
+
+        const parsed = JSON.parse(log.details || "{}") as {
+          receiptNo?: string;
+          lines?: Array<{
+            menuItemId?: string | null;
+            supplyItemId?: string | null;
+            name?: string;
+            quantity?: number;
+          }>;
+        };
+        const receiptNo = parsed.receiptNo || log.entityId;
+        const lines = Array.isArray(parsed.lines) ? parsed.lines : [];
+
+        for (const line of lines) {
+          const qty = Math.max(0, Number(line.quantity ?? 0));
+          if (qty <= 0) continue;
+          if (line.menuItemId) {
+            await tx.menuItem.update({
+              where: { id: line.menuItemId },
+              data: { stockQty: { decrement: qty } },
+            });
+          }
+          if (line.supplyItemId) {
+            await tx.supplyItem.update({
+              where: { id: line.supplyItemId },
+              data: { stockQty: { decrement: qty } },
+            });
+          }
+        }
+
+        await tx.supplyMovement.deleteMany({
+          where: {
+            type: "RESTOCK",
+            notes: { contains: `ใบรับ ${receiptNo}` },
+          },
+        });
+
+        await tx.auditLog.update({
+          where: { id: log.id },
+          data: { action: "STOCK_RECEIVE_VOIDED" },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            userId: user.id,
+            action: "STOCK_RECEIVE_VOID",
+            entityType: "STOCK",
+            entityId: receiptNo,
+            details: `ยกเลิกใบรับสินค้า ${receiptNo} (${lines.length} รายการ) · เหตุผล: ${cleanReason}`,
+          },
+        });
+      });
+
+      invalidateStockCache();
+      const payload = await buildUnifiedStockPayload(true);
+      const history = await getReceivingHistory();
+      return NextResponse.json({ ...payload, history });
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : "ยกเลิกใบรับไม่สำเร็จ" },
+        { status: 400 }
+      );
+    }
   }
 
   if (body.action === "CREATE_CATEGORY") {

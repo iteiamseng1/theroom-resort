@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { verifyVoidPermission } from "@/lib/void-auth";
 import { calculateNights, hasDateOverlap } from "@/lib/pms-math";
 import { getThaiDatePrefix, nextDailySeqNumber } from "@/lib/doc-number";
 
@@ -293,20 +294,22 @@ export async function PATCH(req: NextRequest) {
     keyDepositAction,
     keyDepositRefunded,
     keyDepositRefundMethod,
+    reason,
   } = body as {
     stayId: string;
-    action: "CHECK_IN" | "CHECK_OUT" | "CANCEL" | "ROOM_MOVE" | "EXTEND_SHORT_TIME";
+    action: "CHECK_IN" | "CHECK_OUT" | "CANCEL" | "VOID_STAY" | "ROOM_MOVE" | "EXTEND_SHORT_TIME";
     newRoomId?: string;
     extendHours?: number;
     extraCharge?: number;
     keyDepositAction?: "RETURN" | "FORFEIT";
     keyDepositRefunded?: number;
     keyDepositRefundMethod?: string;
+    reason?: string;
   };
 
   const stay = await prisma.stay.findUnique({
     where: { id: stayId },
-    include: { room: true, folio: true },
+    include: { room: true, folio: true, guest: true },
   });
 
   if (!stay) {
@@ -454,6 +457,87 @@ export async function PATCH(req: NextRequest) {
       where: { id: stayId },
       data: { status: "CANCELLED" },
     });
+    return NextResponse.json({ stay: updated });
+  }
+
+  if (action === "VOID_STAY") {
+    const hasVoid = await verifyVoidPermission(user.id);
+    if (!hasVoid) {
+      return NextResponse.json(
+        { error: "คุณไม่มีสิทธิ์ยกเลิกห้องพัก (กรุณาติดต่อ Admin เพื่อเปิดสิทธิ์)" },
+        { status: 403 }
+      );
+    }
+
+    const cleanReason = String(reason ?? "").trim();
+    if (!cleanReason) {
+      return NextResponse.json({ error: "กรุณาระบุเหตุผลในการยกเลิกห้องพัก" }, { status: 400 });
+    }
+    if (stay.status !== "CHECKED_IN" && stay.status !== "RESERVED") {
+      return NextResponse.json(
+        { error: "ไม่สามารถยกเลิกการเข้าพักที่ Check-out หรือถูกยกเลิกไปแล้วได้" },
+        { status: 400 }
+      );
+    }
+
+    const activePosCount = await prisma.posOrder.count({
+      where: { stayId: stay.id, status: "CHARGED_TO_ROOM" },
+    });
+    if (activePosCount > 0) {
+      return NextResponse.json(
+        { error: "ห้องนี้มีบิล POS โยนเข้าห้องอยู่ กรุณายกเลิกบิล POS ในหน้า POS ก่อน" },
+        { status: 400 }
+      );
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      if (stay.folio) {
+        await tx.payment.deleteMany({ where: { folioId: stay.folio.id } });
+        await tx.folioItem.deleteMany({ where: { folioId: stay.folio.id } });
+        await tx.folio.update({
+          where: { id: stay.folio.id },
+          data: {
+            status: "VOID",
+            totalCharges: 0,
+            totalPayments: 0,
+            balance: 0,
+          },
+        });
+      }
+
+      const voidNote = `[VOID โดย ${user.name}: ${cleanReason}]`;
+      const nextNotes = stay.notes ? `${stay.notes}\n${voidNote}` : voidNote;
+
+      const s = await tx.stay.update({
+        where: { id: stay.id },
+        data: {
+          status: "CANCELLED",
+          keyDeposit: 0,
+          keyDepositStatus: "VOIDED",
+          notes: nextNotes,
+        },
+      });
+
+      if (stay.status === "CHECKED_IN") {
+        await tx.room.update({
+          where: { id: stay.roomId },
+          data: { status: "VC" },
+        });
+      }
+
+      await tx.auditLog.create({
+        data: {
+          userId: user.id,
+          action: "STAY_VOID",
+          entityType: "Stay",
+          entityId: stay.bookingCode,
+          details: `ยกเลิกห้อง ${stay.room.roomNumber} (${stay.bookingCode} · ${stay.guest?.fullName ?? "-"}) · เหตุผล: ${cleanReason}`,
+        },
+      });
+
+      return s;
+    });
+
     return NextResponse.json({ stay: updated });
   }
 

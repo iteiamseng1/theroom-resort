@@ -2,6 +2,7 @@ import { AppShell } from "@/components/AppShell";
 import { PosClient } from "@/components/PosClient";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/require-session";
+import { hasVoidPermission } from "@/lib/roles";
 
 export default async function PosPage() {
   const { user, hotelName } = await requireSession([
@@ -48,7 +49,7 @@ export default async function PosPage() {
         vatRate={setting?.vatRate ?? 7}
         serviceRate={setting?.serviceChargeRate ?? 0}
         userRole={user.role}
-        canVoidPos={user.role === "OWNER" || Boolean(user.allowedMenus?.includes("/pos/void"))}
+        canVoidPos={hasVoidPermission(user.role, user.allowedMenus)}
         propertySetting={{
           hotelName: setting?.hotelName || hotelName,
           address: setting?.address || "",

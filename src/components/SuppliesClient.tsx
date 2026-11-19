@@ -7,10 +7,12 @@ import {
   filterByThaiDate,
   getBangkokDateKey,
 } from "@/components/HistoryDateFilter";
+import { VoidConfirmModal } from "@/components/VoidConfirmModal";
 import {
   AlertTriangle,
   ArrowDownToLine,
   ArrowUpFromLine,
+  Ban,
   Barcode,
   Check,
   History,
@@ -65,10 +67,12 @@ export function SuppliesClient({
   initialItems,
   initialMovements,
   roomNumbers,
+  canVoid = false,
 }: {
   initialItems: SupplyItem[];
   initialMovements: SupplyMovement[];
   roomNumbers: string[];
+  canVoid?: boolean;
 }) {
   const [tab, setTab] = useState<"POS" | "HISTORY">("POS");
   const [items, setItems] = useState<SupplyItem[]>(initialItems);
@@ -91,10 +95,14 @@ export function SuppliesClient({
   // Printable Slip Modal
   const [printSlip, setPrintSlip] = useState<PrintBatchSlip | null>(null);
   const [historyDate, setHistoryDate] = useState(() => getBangkokDateKey());
+  const [voidSlipTarget, setVoidSlipTarget] = useState<(PrintBatchSlip & { totalQty: number; movementIds: string[] }) | null>(null);
+  const [voidReason, setVoidReason] = useState("");
+  const [voidSubmitting, setVoidSubmitting] = useState(false);
+  const [voidError, setVoidError] = useState("");
 
   // Group movements by slip number (only ISSUE / เบิกใช้)
   const groupedSlips = useMemo(() => {
-    const map = new Map<string, PrintBatchSlip & { totalQty: number }>();
+    const map = new Map<string, PrintBatchSlip & { totalQty: number; movementIds: string[] }>();
 
     for (const m of movements) {
       if (m.type !== "ISSUE") continue;
@@ -121,6 +129,7 @@ export function SuppliesClient({
       if (existing) {
         existing.lines.push(line);
         existing.totalQty += m.quantity;
+        existing.movementIds.push(m.id);
       } else {
         map.set(slipNo, {
           slipNo,
@@ -132,6 +141,7 @@ export function SuppliesClient({
           createdAt: m.createdAt,
           lines: [line],
           totalQty: m.quantity,
+          movementIds: [m.id],
         });
       }
     }
@@ -719,7 +729,7 @@ export function SuppliesClient({
                         <span className="text-slate-500">โดย {slip.userName}</span>
                       </div>
 
-                      <div className="flex items-center gap-3 no-print">
+                      <div className="flex flex-wrap items-center gap-2 no-print">
                         <span className="text-xs font-semibold text-slate-600">
                           รวม {slip.lines.length} รายการ ({slip.totalQty} ชิ้น)
                         </span>
@@ -730,6 +740,19 @@ export function SuppliesClient({
                         >
                           <Printer className="w-3.5 h-3.5" /> พิมพ์ใบเบิก
                         </button>
+                        {canVoid && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setVoidSlipTarget(slip);
+                              setVoidReason("");
+                              setVoidError("");
+                            }}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold"
+                          >
+                            <Ban className="w-3.5 h-3.5" /> ยกเลิกใบเบิก
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -878,6 +901,65 @@ export function SuppliesClient({
           </div>
         </div>
       )}
+
+      <VoidConfirmModal
+        open={Boolean(voidSlipTarget)}
+        title="ยกเลิกใบเบิกของใช้ (Void)"
+        subtitle={
+          voidSlipTarget
+            ? `เลขที่ใบเบิก ${voidSlipTarget.slipNo} · รวม ${voidSlipTarget.totalQty} ชิ้น`
+            : ""
+        }
+        effects={[
+          "คืนสต็อกของใช้ทุกรายการในใบเบิกกลับเข้าคลังอัตโนมัติ",
+          "ลบใบเบิกนี้ออกจากประวัติการเบิก",
+          "บันทึกประวัติผู้ยกเลิกและเหตุผลลงใน Audit Log",
+        ]}
+        presets={[
+          "คีย์รายการ/จำนวนผิด",
+          "เบิกผิดห้อง/ผิดแผนก",
+          "ไม่ได้นำไปใช้งานจริง",
+        ]}
+        reason={voidReason}
+        onReasonChange={setVoidReason}
+        error={voidError}
+        submitting={voidSubmitting}
+        onClose={() => setVoidSlipTarget(null)}
+        onConfirm={async () => {
+          if (!voidSlipTarget) return;
+          const reason = voidReason.trim();
+          if (!reason) {
+            setVoidError("กรุณาระบุเหตุผลในการยกเลิกใบเบิก");
+            return;
+          }
+          setVoidSubmitting(true);
+          setVoidError("");
+          try {
+            const res = await fetch("/api/supplies", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "VOID_SLIP",
+                slipNo: voidSlipTarget.slipNo,
+                movementIds: voidSlipTarget.movementIds,
+                reason,
+              }),
+            });
+            if (res.ok) {
+              setVoidSlipTarget(null);
+              setVoidReason("");
+              await refresh();
+            } else {
+              const err = await res.json();
+              setVoidError(err.error || "ยกเลิกใบเบิกไม่สำเร็จ");
+            }
+          } catch {
+            setVoidError("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+          } finally {
+            setVoidSubmitting(false);
+          }
+        }}
+      />
     </>
   );
 }

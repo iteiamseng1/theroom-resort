@@ -7,8 +7,10 @@ import {
   filterByThaiDate,
   getBangkokDateKey,
 } from "@/components/HistoryDateFilter";
+import { VoidConfirmModal } from "@/components/VoidConfirmModal";
 import {
   ArrowDownToLine,
+  Ban,
   Barcode,
   History,
   Minus,
@@ -55,10 +57,12 @@ export function ReceivingClient({
   initialItems,
   initialHistory,
   hotelName,
+  canVoid = false,
 }: {
   initialItems: UnifiedStockItem[];
   initialHistory: ReceivingHistoryRecord[];
   hotelName: string;
+  canVoid?: boolean;
 }) {
   const [tab, setTab] = useState<"POS" | "HISTORY">("POS");
   const [items, setItems] = useState<UnifiedStockItem[]>(initialItems);
@@ -75,6 +79,10 @@ export function ReceivingClient({
   const [errorMsg, setErrorMsg] = useState("");
   const [printReceipt, setPrintReceipt] = useState<ReceivingHistoryRecord | null>(null);
   const [historyDate, setHistoryDate] = useState(() => getBangkokDateKey());
+  const [voidRecTarget, setVoidRecTarget] = useState<ReceivingHistoryRecord | null>(null);
+  const [voidReason, setVoidReason] = useState("");
+  const [voidSubmitting, setVoidSubmitting] = useState(false);
+  const [voidError, setVoidError] = useState("");
 
   const filteredHistory = useMemo(
     () => filterByThaiDate(history, (r) => r.createdAt, historyDate),
@@ -517,7 +525,7 @@ export function ReceivingClient({
                           <span className="text-slate-500">โดย {rec.userName}</span>
                         </div>
 
-                        <div className="flex items-center gap-3 no-print">
+                        <div className="flex flex-wrap items-center gap-2 no-print">
                           <span className="text-xs font-semibold text-slate-600">
                             รวม {rec.lines.length} รายการ ({totalQty} ชิ้น)
                           </span>
@@ -531,6 +539,19 @@ export function ReceivingClient({
                           >
                             <Printer className="w-3.5 h-3.5" /> พิมพ์ใบรับ
                           </button>
+                          {canVoid && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setVoidRecTarget(rec);
+                                setVoidReason("");
+                                setVoidError("");
+                              }}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold"
+                            >
+                              <Ban className="w-3.5 h-3.5" /> ยกเลิกใบรับ
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -683,6 +704,65 @@ export function ReceivingClient({
           </div>
         </div>
       )}
+
+      <VoidConfirmModal
+        open={Boolean(voidRecTarget)}
+        title="ยกเลิกใบรับสินค้าเข้าคลัง (Void)"
+        subtitle={
+          voidRecTarget
+            ? `เลขที่ใบรับ ${voidRecTarget.receiptNo} · ยอดทุนรวม ฿${voidRecTarget.totalCost.toLocaleString("th-TH", { maximumFractionDigits: 2 })}`
+            : ""
+        }
+        effects={[
+          "หักสต็อกสินค้าทุกรายการในใบรับนี้ออกจากคลังอัตโนมัติ",
+          "ลบใบรับนี้ออกจากประวัติการรับสินค้า",
+          "บันทึกประวัติผู้ยกเลิกและเหตุผลลงใน Audit Log",
+        ]}
+        presets={[
+          "คีย์สินค้า/จำนวนผิด",
+          "คีย์ราคาทุนผิด",
+          "บันทึกซ้ำ",
+        ]}
+        reason={voidReason}
+        onReasonChange={setVoidReason}
+        error={voidError}
+        submitting={voidSubmitting}
+        onClose={() => setVoidRecTarget(null)}
+        onConfirm={async () => {
+          if (!voidRecTarget) return;
+          const reason = voidReason.trim();
+          if (!reason) {
+            setVoidError("กรุณาระบุเหตุผลในการยกเลิกใบรับ");
+            return;
+          }
+          setVoidSubmitting(true);
+          setVoidError("");
+          try {
+            const res = await fetch("/api/stock", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "VOID_RECEIVE",
+                auditLogId: voidRecTarget.id,
+                reason,
+              }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+              setVoidRecTarget(null);
+              setVoidReason("");
+              if (data.items) setItems(data.items);
+              if (data.history) setHistory(data.history);
+            } else {
+              setVoidError(data.error || "ยกเลิกใบรับไม่สำเร็จ");
+            }
+          } catch {
+            setVoidError("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+          } finally {
+            setVoidSubmitting(false);
+          }
+        }}
+      />
     </>
   );
 }

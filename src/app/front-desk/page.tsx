@@ -2,6 +2,7 @@ import { AppShell } from "@/components/AppShell";
 import { FrontDeskClient } from "@/components/FrontDeskClient";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/require-session";
+import { hasVoidPermission } from "@/lib/roles";
 
 export default async function FrontDeskPage() {
   const { user, hotelName } = await requireSession([
@@ -60,6 +61,7 @@ export default async function FrontDeskPage() {
       <FrontDeskClient
         initialRooms={serialized}
         initialGuests={guests}
+        canVoid={hasVoidPermission(user.role, user.allowedMenus)}
         propertySetting={{
           hotelName: setting?.hotelName || hotelName,
           address: setting?.address || "",

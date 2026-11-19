@@ -2,6 +2,7 @@ import { AppShell } from "@/components/AppShell";
 import { ReceivingClient } from "@/components/ReceivingClient";
 import { buildUnifiedStockPayload, getReceivingHistory } from "@/app/api/stock/route";
 import { requireSession } from "@/lib/require-session";
+import { hasVoidPermission } from "@/lib/roles";
 
 export default async function ReceivingPage() {
   const { user, hotelName } = await requireSession([
@@ -23,6 +24,7 @@ export default async function ReceivingPage() {
         initialItems={items}
         initialHistory={history}
         hotelName={hotelName}
+        canVoid={hasVoidPermission(user.role, user.allowedMenus)}
       />
     </AppShell>
   );

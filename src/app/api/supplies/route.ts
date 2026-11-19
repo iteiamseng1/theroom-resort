@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { verifyVoidPermission } from "@/lib/void-auth";
 import { getThaiDatePrefix, nextDailySeqNumber } from "@/lib/doc-number";
 
 export async function GET() {
@@ -189,6 +190,77 @@ export async function POST(req: NextRequest) {
     } catch (err) {
       return NextResponse.json(
         { error: err instanceof Error ? err.message : "เกิดข้อผิดพลาด" },
+        { status: 400 }
+      );
+    }
+  }
+
+  if (body.action === "VOID_SLIP") {
+    const hasVoid = await verifyVoidPermission(user.id);
+    if (!hasVoid) {
+      return NextResponse.json(
+        { error: "คุณไม่มีสิทธิ์ยกเลิกใบเบิก (กรุณาติดต่อ Admin เพื่อเปิดสิทธิ์)" },
+        { status: 403 }
+      );
+    }
+
+    const { slipNo, movementIds, reason } = body as {
+      slipNo?: string;
+      movementIds?: string[];
+      reason?: string;
+    };
+    const cleanReason = String(reason ?? "").trim();
+    if (!cleanReason) {
+      return NextResponse.json({ error: "กรุณาระบุเหตุผลในการยกเลิกใบเบิก" }, { status: 400 });
+    }
+    if (!Array.isArray(movementIds) || movementIds.length === 0) {
+      return NextResponse.json({ error: "ไม่พบรายการใบเบิกที่ต้องการยกเลิก" }, { status: 400 });
+    }
+
+    try {
+      await prisma.$transaction(async (tx) => {
+        const mvs = await tx.supplyMovement.findMany({
+          where: { id: { in: movementIds }, type: "ISSUE" },
+          include: { supplyItem: true },
+        });
+        if (mvs.length === 0) {
+          throw new Error("ไม่พบใบเบิก หรือใบเบิกนี้ถูกยกเลิกไปแล้ว");
+        }
+
+        const summaryParts: string[] = [];
+        for (const mv of mvs) {
+          const updatedItem = await tx.supplyItem.update({
+            where: { id: mv.supplyItemId },
+            data: { stockQty: { increment: mv.quantity } },
+          });
+          if (updatedItem.menuItemId) {
+            await tx.menuItem.update({
+              where: { id: updatedItem.menuItemId },
+              data: { stockQty: updatedItem.stockQty },
+            });
+          }
+          summaryParts.push(`${mv.supplyItem.name} x${mv.quantity} ${mv.supplyItem.unit}`);
+        }
+
+        await tx.supplyMovement.deleteMany({
+          where: { id: { in: mvs.map((m) => m.id) } },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            userId: user.id,
+            action: "SUPPLY_ISSUE_VOID",
+            entityType: "SupplySlip",
+            entityId: slipNo || mvs[0].id,
+            details: `ยกเลิกใบเบิก ${slipNo || "-"} (${summaryParts.join(", ")}) · เหตุผล: ${cleanReason}`,
+          },
+        });
+      });
+
+      return NextResponse.json({ ok: true });
+    } catch (err) {
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : "ยกเลิกใบเบิกไม่สำเร็จ" },
         { status: 400 }
       );
     }
