@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ResortLogo } from "@/components/ResortLogo";
+import {
+  HistoryDateFilter,
+  filterByThaiDate,
+} from "@/components/HistoryDateFilter";
 import {
   Ban,
   Barcode,
@@ -165,6 +169,12 @@ export function PosClient({
   const [voidReason, setVoidReason] = useState("");
   const [voidSubmitting, setVoidSubmitting] = useState(false);
   const [voidError, setVoidError] = useState("");
+  const [historyDate, setHistoryDate] = useState("");
+
+  const filteredOrders = useMemo(
+    () => filterByThaiDate(orders, (o) => o.createdAt, historyDate),
+    [orders, historyDate]
+  );
 
   useEffect(() => {
     if (tab === "POS") {
@@ -965,12 +975,23 @@ export function PosClient({
 
       {tab === "HISTORY" && (
         <div className="no-print space-y-3">
-          {orders.length === 0 ? (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-semibold text-sm text-slate-800">
+              ประวัติบิลขาย POS ({filteredOrders.length} บิล)
+            </h2>
+            <HistoryDateFilter
+              selectedDate={historyDate}
+              onChange={setHistoryDate}
+              count={filteredOrders.length}
+              unitLabel="บิล"
+            />
+          </div>
+          {filteredOrders.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-sm text-slate-400">
-              ยังไม่มีประวัติบิลขาย POS
+              {orders.length === 0 ? "ยังไม่มีประวัติบิลขาย POS" : "ไม่พบบิลขาย POS ในวันที่เลือก"}
             </div>
           ) : (
-            orders.map((o) => {
+            filteredOrders.map((o) => {
               const totalUnitsInOrder = o.items.reduce((s, it) => s + it.quantity, 0);
               const isVoided = o.status === "CANCELLED";
               const allowVoid = canVoidOrder(o);

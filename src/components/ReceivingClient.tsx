@@ -3,6 +3,10 @@
 import { useMemo, useRef, useState } from "react";
 import { ResortLogo } from "@/components/ResortLogo";
 import {
+  HistoryDateFilter,
+  filterByThaiDate,
+} from "@/components/HistoryDateFilter";
+import {
   ArrowDownToLine,
   Barcode,
   History,
@@ -69,6 +73,12 @@ export function ReceivingClient({
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [printReceipt, setPrintReceipt] = useState<ReceivingHistoryRecord | null>(null);
+  const [historyDate, setHistoryDate] = useState("");
+
+  const filteredHistory = useMemo(
+    () => filterByThaiDate(history, (r) => r.createdAt, historyDate),
+    [history, historyDate]
+  );
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -456,19 +466,27 @@ export function ReceivingClient({
 
         {tab === "HISTORY" && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-semibold text-sm text-slate-800">
-                ประวัติใบรับของเข้าคลัง (แยกตามเลขที่ใบรับ {history.length} ใบ)
+                ประวัติใบรับของเข้าคลัง (แยกตามเลขที่ใบรับ {filteredHistory.length} ใบ)
               </h2>
+              <HistoryDateFilter
+                selectedDate={historyDate}
+                onChange={setHistoryDate}
+                count={filteredHistory.length}
+                unitLabel="ใบ"
+              />
             </div>
 
-            {history.length === 0 ? (
+            {filteredHistory.length === 0 ? (
               <div className="bg-white rounded-xl border border-slate-200 px-4 py-10 text-center text-xs text-slate-400">
-                ยังไม่มีประวัติการรับของเข้าคลัง
+                {history.length === 0
+                  ? "ยังไม่มีประวัติการรับของเข้าคลัง"
+                  : "ไม่พบใบรับสินค้าในวันที่เลือก"}
               </div>
             ) : (
               <div className="space-y-3">
-                {history.map((rec) => {
+                {filteredHistory.map((rec) => {
                   const totalQty = rec.lines.reduce((sum, l) => sum + l.quantity, 0);
                   return (
                     <div

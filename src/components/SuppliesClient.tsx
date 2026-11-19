@@ -3,6 +3,10 @@
 import { useMemo, useRef, useState } from "react";
 import { ResortLogo } from "@/components/ResortLogo";
 import {
+  HistoryDateFilter,
+  filterByThaiDate,
+} from "@/components/HistoryDateFilter";
+import {
   AlertTriangle,
   ArrowDownToLine,
   ArrowUpFromLine,
@@ -85,6 +89,7 @@ export function SuppliesClient({
 
   // Printable Slip Modal
   const [printSlip, setPrintSlip] = useState<PrintBatchSlip | null>(null);
+  const [historyDate, setHistoryDate] = useState("");
 
   // Group movements by slip number (e.g. [691113-001] or ใบรับ 691113-001)
   const groupedSlips = useMemo(() => {
@@ -131,6 +136,11 @@ export function SuppliesClient({
 
     return Array.from(map.values());
   }, [movements]);
+
+  const filteredSlips = useMemo(
+    () => filterByThaiDate(groupedSlips, (s) => s.createdAt, historyDate),
+    [groupedSlips, historyDate]
+  );
 
   // New / Edit Item in HISTORY tab
   const [showAdd, setShowAdd] = useState(false);
@@ -654,19 +664,27 @@ export function SuppliesClient({
 
         {tab === "HISTORY" && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-semibold text-sm text-slate-800">
-                ประวัติการเบิก / รับของ (แยกตามเลขที่ใบเบิก {groupedSlips.length} ใบ)
+                ประวัติการเบิก / รับของ (แยกตามเลขที่ใบเบิก {filteredSlips.length} ใบ)
               </h2>
+              <HistoryDateFilter
+                selectedDate={historyDate}
+                onChange={setHistoryDate}
+                count={filteredSlips.length}
+                unitLabel="ใบ"
+              />
             </div>
 
-            {groupedSlips.length === 0 ? (
+            {filteredSlips.length === 0 ? (
               <div className="bg-white rounded-xl border border-slate-200 px-4 py-10 text-center text-xs text-slate-400">
-                ยังไม่มีประวัติการเบิก-รับของใช้
+                {groupedSlips.length === 0
+                  ? "ยังไม่มีประวัติการเบิก-รับของใช้"
+                  : "ไม่พบรายการในวันที่เลือก"}
               </div>
             ) : (
               <div className="space-y-3">
-                {groupedSlips.map((slip) => (
+                {filteredSlips.map((slip) => (
                   <div
                     key={slip.slipNo}
                     className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs"
