@@ -165,6 +165,8 @@ export function FrontDeskClient({
   // Maintenance / Cleaning quick form in Room Modal
   const [maintNote, setMaintNote] = useState("");
   const [showMaintForm, setShowMaintForm] = useState(false);
+  const [sendingCleaning, setSendingCleaning] = useState(false);
+  const [cleaningToast, setCleaningToast] = useState<string | null>(null);
 
   // Quick Payment & Receipt in Room Modal
   const [payStayId, setPayStayId] = useState<string | null>(null);
@@ -418,18 +420,36 @@ export function FrontDeskClient({
     await refreshRooms();
   }
 
-  async function handleRequestCleaning(roomId: string) {
-    await fetch("/api/housekeeping", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        roomId,
-        type: "CLEANING",
-        priority: "HIGH",
-        notes: "แจ้งทำความสะอาดจากหน้าฟรอนต์",
-      }),
-    });
-    await refreshRooms();
+  async function handleRequestCleaning(roomId: string, roomNumber?: string) {
+    if (sendingCleaning) return;
+    setSendingCleaning(true);
+    try {
+      const res = await fetch("/api/housekeeping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId,
+          type: "CLEANING",
+          priority: "HIGH",
+          notes: "แจ้งทำความสะอาดจากหน้าฟรอนต์",
+        }),
+      });
+      if (res.ok) {
+        await refreshRooms();
+        const label = roomNumber ? `แจ้งแม่บ้านแล้ว (ห้อง ${roomNumber})` : "แจ้งแม่บ้านแล้ว";
+        setCleaningToast(label);
+        setTimeout(() => {
+          setCleaningToast((prev) => (prev === label ? null : prev));
+        }, 3500);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "ส่งแจ้งแม่บ้านไม่สำเร็จ");
+      }
+    } catch {
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setSendingCleaning(false);
+    }
   }
 
   async function handleReportMaintenance(e: React.FormEvent, roomId: string) {
@@ -833,10 +853,16 @@ export function FrontDeskClient({
                           {selectedRoom.status !== "VD" && selectedRoom.status !== "OOO" && (
                             <button
                               type="button"
-                              onClick={() => handleRequestCleaning(selectedRoom.id)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold"
+                              disabled={sendingCleaning}
+                              onClick={() => handleRequestCleaning(selectedRoom.id, selectedRoom.roomNumber)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-xs font-semibold"
                             >
-                              <ClipboardCheck className="w-3.5 h-3.5" /> ส่งทำความสะอาด
+                              {sendingCleaning ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <ClipboardCheck className="w-3.5 h-3.5" />
+                              )}
+                              {sendingCleaning ? "กำลังแจ้ง..." : "ส่งทำความสะอาด"}
                             </button>
                           )}
                         </>
@@ -1009,10 +1035,17 @@ export function FrontDeskClient({
                   selectedRoom.status !== "OOO" &&
                   !selectedRoom.stays.some((s) => s.status === "CHECKED_IN") && (
                   <button
-                    onClick={() => handleRequestCleaning(selectedRoom.id)}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold"
+                    type="button"
+                    disabled={sendingCleaning}
+                    onClick={() => handleRequestCleaning(selectedRoom.id, selectedRoom.roomNumber)}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-xs font-semibold"
                   >
-                    <ClipboardCheck className="w-4 h-4" /> ส่งทำความสะอาด
+                    {sendingCleaning ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <ClipboardCheck className="w-4 h-4" />
+                    )}
+                    {sendingCleaning ? "กำลังแจ้ง..." : "ส่งทำความสะอาด"}
                   </button>
                 )}
 
@@ -1831,6 +1864,20 @@ export function FrontDeskClient({
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {cleaningToast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2.5 px-4 py-3 rounded-xl bg-emerald-600 text-white shadow-xl border border-emerald-500 text-sm font-semibold animate-bounce">
+          <CheckCircle2 className="w-5 h-5 shrink-0" />
+          <span>{cleaningToast}</span>
+          <button
+            type="button"
+            onClick={() => setCleaningToast(null)}
+            className="ml-1 p-0.5 rounded hover:bg-emerald-700/60"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
     </>
