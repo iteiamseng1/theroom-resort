@@ -56,9 +56,11 @@ type GuestFilter = "ALL" | "HAS_DEBT" | "CREDIT" | "CASH";
 
 export function GuestsClient({
   initialGuests,
+  canDelete = false,
   setting,
 }: {
   initialGuests: GuestRow[];
+  canDelete?: boolean;
   setting: PropertySettingInfo;
 }) {
   const [guests, setGuests] = useState<GuestRow[]>(initialGuests);
@@ -374,14 +376,16 @@ export function GuestsClient({
                 >
                   <Pencil className="w-3 h-3" /> แก้ไข
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(g)}
-                  className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-rose-200 bg-white hover:bg-rose-50 text-rose-600"
-                  title="ลบข้อมูลลูกค้า"
-                >
-                  <Trash2 className="w-3 h-3" /> ลบ
-                </button>
+                {canDelete && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(g)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border border-rose-200 bg-white hover:bg-rose-50 text-rose-600"
+                    title="ลบข้อมูลลูกค้า"
+                  >
+                    <Trash2 className="w-3 h-3" /> ลบ
+                  </button>
+                )}
                 <select
                   value={g.tag === "CREDIT" ? "CREDIT" : "NORMAL"}
                   onChange={(e) => updateTag(g.id, e.target.value)}

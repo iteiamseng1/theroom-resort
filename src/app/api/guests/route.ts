@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { verifyVoidPermission } from "@/lib/void-auth";
 
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser();
@@ -109,6 +110,14 @@ export async function PATCH(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const hasVoid = await verifyVoidPermission(user.id);
+  if (!hasVoid) {
+    return NextResponse.json(
+      { error: "คุณไม่มีสิทธิ์ลบข้อมูลลูกค้า (กรุณาติดต่อ Admin เพื่อเปิดสิทธิ์ ยกเลิก)" },
+      { status: 403 }
+    );
+  }
 
   const body = await req.json();
   const id = String(body.id ?? "").trim();

@@ -2,6 +2,7 @@ import { AppShell } from "@/components/AppShell";
 import { GuestsClient } from "@/components/GuestsClient";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/require-session";
+import { hasVoidPermission } from "@/lib/roles";
 
 export default async function GuestsPage() {
   const { user, hotelName } = await requireSession(["OWNER", "MANAGER", "FRONT_DESK"], "/guests");
@@ -48,6 +49,7 @@ export default async function GuestsPage() {
     <AppShell user={user} hotelName={hotelName}>
       <GuestsClient
         initialGuests={serializedGuests}
+        canDelete={hasVoidPermission(user.role, user.allowedMenus)}
         setting={
           setting ?? {
             hotelName: "TheRoom Resort ชุมแพ",
