@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { History, Printer } from "lucide-react";
+import { ChevronLeft, ChevronRight, History, Printer } from "lucide-react";
+import { ThaiCalendarPicker } from "@/components/ThaiCalendarPicker";
+import { getBangkokDateKey } from "@/components/HistoryDateFilter";
 
-function formatLocalDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+function shiftDateKey(dateKey: string, deltaDays: number): string {
+  const [y, m, d] = dateKey.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + deltaDays));
+  return dt.toISOString().slice(0, 10);
 }
 
 export function ReportsFilterBar({
@@ -56,31 +57,64 @@ export function ReportsFilterBar({
   }
 
   function selectPreset(preset: "TODAY" | "7D" | "MONTH" | "ALL") {
-    const now = new Date();
-    const todayStr = formatLocalDate(now);
+    const todayStr = getBangkokDateKey();
     if (preset === "ALL") {
       applyRange("", "");
     } else if (preset === "TODAY") {
       applyRange(todayStr, todayStr);
     } else if (preset === "7D") {
-      const start = new Date(now);
-      start.setDate(start.getDate() - 6);
-      applyRange(formatLocalDate(start), todayStr);
+      applyRange(shiftDateKey(todayStr, -6), todayStr);
     } else if (preset === "MONTH") {
-      const start = new Date(now.getFullYear(), now.getMonth(), 1);
-      applyRange(formatLocalDate(start), todayStr);
+      applyRange(`${todayStr.slice(0, 7)}-01`, todayStr);
     }
   }
+
+  const todayKey = getBangkokDateKey();
+  const last7Key = shiftDateKey(todayKey, -6);
+  const monthStartKey = `${todayKey.slice(0, 7)}-01`;
+  const singleDateValue = from && from === to ? from : "";
 
   return (
     <div className="no-print bg-white rounded-xl border border-slate-200 p-2.5 sm:p-3.5 shadow-xs flex flex-wrap items-center justify-between gap-2 sm:gap-3">
       <div className="flex flex-wrap items-center gap-1.5">
         <button
           type="button"
+          onClick={() => {
+            const base = singleDateValue || from || todayKey;
+            const prev = shiftDateKey(base, -1);
+            applyRange(prev, prev);
+          }}
+          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600"
+          title="วันก่อนหน้า"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <ThaiCalendarPicker
+          value={singleDateValue}
+          onChange={(val) => {
+            if (val) applyRange(val, val);
+            else applyRange("", "");
+          }}
+          compact
+          className="w-36"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            const base = singleDateValue || to || todayKey;
+            const next = shiftDateKey(base, 1);
+            applyRange(next, next);
+          }}
+          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600"
+          title="วันถัดไป"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
           onClick={() => selectPreset("TODAY")}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
-            initialFrom === formatLocalDate(new Date()) &&
-            initialTo === formatLocalDate(new Date())
+            initialFrom === todayKey && initialTo === todayKey
               ? "bg-slate-900 text-white"
               : "bg-slate-100 hover:bg-slate-200 text-slate-700"
           }`}
@@ -90,14 +124,22 @@ export function ReportsFilterBar({
         <button
           type="button"
           onClick={() => selectPreset("7D")}
-          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700"
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+            initialFrom === last7Key && initialTo === todayKey
+              ? "bg-slate-900 text-white"
+              : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+          }`}
         >
           7 วันล่าสุด
         </button>
         <button
           type="button"
           onClick={() => selectPreset("MONTH")}
-          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700"
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+            initialFrom === monthStartKey && initialTo === todayKey
+              ? "bg-slate-900 text-white"
+              : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+          }`}
         >
           เดือนนี้
         </button>
