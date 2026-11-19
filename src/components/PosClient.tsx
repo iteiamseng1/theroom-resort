@@ -6,6 +6,7 @@ import { ResortLogo } from "@/components/ResortLogo";
 import {
   HistoryDateFilter,
   filterByThaiDate,
+  getBangkokDateKey,
 } from "@/components/HistoryDateFilter";
 import {
   Ban,
@@ -169,7 +170,7 @@ export function PosClient({
   const [voidReason, setVoidReason] = useState("");
   const [voidSubmitting, setVoidSubmitting] = useState(false);
   const [voidError, setVoidError] = useState("");
-  const [historyDate, setHistoryDate] = useState("");
+  const [historyDate, setHistoryDate] = useState(() => getBangkokDateKey());
 
   const filteredOrders = useMemo(
     () => filterByThaiDate(orders, (o) => o.createdAt, historyDate),

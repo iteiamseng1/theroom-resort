@@ -5,6 +5,7 @@ import { ResortLogo } from "@/components/ResortLogo";
 import {
   HistoryDateFilter,
   filterByThaiDate,
+  getBangkokDateKey,
 } from "@/components/HistoryDateFilter";
 import {
   ArrowDownToLine,
@@ -73,7 +74,7 @@ export function ReceivingClient({
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [printReceipt, setPrintReceipt] = useState<ReceivingHistoryRecord | null>(null);
-  const [historyDate, setHistoryDate] = useState("");
+  const [historyDate, setHistoryDate] = useState(() => getBangkokDateKey());
 
   const filteredHistory = useMemo(
     () => filterByThaiDate(history, (r) => r.createdAt, historyDate),

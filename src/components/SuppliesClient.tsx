@@ -5,6 +5,7 @@ import { ResortLogo } from "@/components/ResortLogo";
 import {
   HistoryDateFilter,
   filterByThaiDate,
+  getBangkokDateKey,
 } from "@/components/HistoryDateFilter";
 import {
   AlertTriangle,
@@ -89,13 +90,14 @@ export function SuppliesClient({
 
   // Printable Slip Modal
   const [printSlip, setPrintSlip] = useState<PrintBatchSlip | null>(null);
-  const [historyDate, setHistoryDate] = useState("");
+  const [historyDate, setHistoryDate] = useState(() => getBangkokDateKey());
 
-  // Group movements by slip number (e.g. [691113-001] or ใบรับ 691113-001)
+  // Group movements by slip number (only ISSUE / เบิกใช้)
   const groupedSlips = useMemo(() => {
     const map = new Map<string, PrintBatchSlip & { totalQty: number }>();
 
     for (const m of movements) {
+      if (m.type !== "ISSUE") continue;
       const slipMatch =
         m.notes.match(/\[([A-Z]{3}-?\d{6}-\d{3,})\]/) ||
         m.notes.match(/\[(\d{6}-\d{3,})\]/) ||
@@ -666,7 +668,7 @@ export function SuppliesClient({
           <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-semibold text-sm text-slate-800">
-                ประวัติการเบิก / รับของ (แยกตามเลขที่ใบเบิก {filteredSlips.length} ใบ)
+                ประวัติการเบิกของใช้ (แยกตามเลขที่ใบเบิก {filteredSlips.length} ใบ)
               </h2>
               <HistoryDateFilter
                 selectedDate={historyDate}
