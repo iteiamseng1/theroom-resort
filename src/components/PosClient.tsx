@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ResortLogo } from "@/components/ResortLogo";
 import {
+  Ban,
   Barcode,
   BedDouble,
   Check,
@@ -59,6 +60,7 @@ interface PosOrder {
   orderType: string;
   status: string;
   totalAmount: number;
+  notes?: string;
   createdAt: string;
   table: { tableNumber: string } | null;
   stay: { room: { roomNumber: string }; guest: { fullName: string } } | null;
@@ -108,6 +110,7 @@ export function PosClient({
   initialOrders,
   vatRate,
   serviceRate,
+  userRole = "FRONT_DESK",
   propertySetting,
 }: {
   initialCategories: Category[];
@@ -116,6 +119,7 @@ export function PosClient({
   initialOrders: PosOrder[];
   vatRate: number;
   serviceRate: number;
+  userRole?: string;
   propertySetting?: {
     hotelName: string;
     address: string;
@@ -155,6 +159,12 @@ export function PosClient({
   const [newCatName, setNewCatName] = useState("");
   const [editingCat, setEditingCat] = useState<{ id: string; name: string } | null>(null);
   const [catError, setCatError] = useState("");
+
+  // Void Order Modal state
+  const [voidOrderTarget, setVoidOrderTarget] = useState<PosOrder | null>(null);
+  const [voidReason, setVoidReason] = useState("");
+  const [voidSubmitting, setVoidSubmitting] = useState(false);
+  const [voidError, setVoidError] = useState("");
 
   useEffect(() => {
     if (tab === "POS") {
@@ -325,6 +335,50 @@ export function PosClient({
     } else {
       const err = await res.json();
       alert(err.error || "ชำระเงินไม่สำเร็จ");
+    }
+  }
+
+  function canVoidOrder(order: PosOrder) {
+    if (order.status === "CANCELLED") return false;
+    if (["OWNER", "MANAGER", "ADMIN"].includes(userRole)) return true;
+    if (["FRONT_DESK", "POS_CASHIER"].includes(userRole)) {
+      const fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" });
+      return fmt.format(new Date(order.createdAt)) === fmt.format(new Date());
+    }
+    return false;
+  }
+
+  async function handleVoidOrder() {
+    if (!voidOrderTarget) return;
+    const reason = voidReason.trim();
+    if (!reason) {
+      setVoidError("กรุณาระบุเหตุผลในการยกเลิกบิล");
+      return;
+    }
+    setVoidSubmitting(true);
+    setVoidError("");
+    try {
+      const res = await fetch("/api/pos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "VOID_ORDER",
+          orderId: voidOrderTarget.id,
+          reason,
+        }),
+      });
+      if (res.ok) {
+        setVoidOrderTarget(null);
+        setVoidReason("");
+        await refreshAll();
+      } else {
+        const err = await res.json();
+        setVoidError(err.error || "ยกเลิกบิลไม่สำเร็จ");
+      }
+    } catch {
+      setVoidError("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setVoidSubmitting(false);
     }
   }
 
@@ -923,16 +977,41 @@ export function PosClient({
           ) : (
             orders.map((o) => {
               const totalUnitsInOrder = o.items.reduce((s, it) => s + it.quantity, 0);
+              const isVoided = o.status === "CANCELLED";
+              const allowVoid = canVoidOrder(o);
               return (
                 <div
                   key={o.id}
-                  className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-2.5"
+                  className={`bg-white rounded-2xl border p-4 shadow-xs space-y-2.5 ${
+                    isVoided ? "border-rose-200 bg-rose-50/30 opacity-80" : "border-slate-200"
+                  }`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-900 text-white">
+                      <span
+                        className={`font-mono text-xs font-bold px-2.5 py-1 rounded-lg text-white ${
+                          isVoided ? "bg-rose-600 line-through" : "bg-slate-900"
+                        }`}
+                      >
                         {o.orderNumber}
                       </span>
+                      {isVoided ? (
+                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">
+                          ยกเลิกแล้ว (VOID)
+                        </span>
+                      ) : o.status === "CHARGED_TO_ROOM" ? (
+                        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
+                          โยนเข้าห้องพัก
+                        </span>
+                      ) : o.status === "PAID" ? (
+                        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          ชำระแล้ว
+                        </span>
+                      ) : (
+                        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                          รอชำระ
+                        </span>
+                      )}
                       <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
                         {o.stay
                           ? `ห้อง ${o.stay.room.roomNumber} (${o.stay.guest.fullName})`
@@ -942,36 +1021,69 @@ export function PosClient({
                         {new Date(o.createdAt).toLocaleString("th-TH")}
                       </span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold text-emerald-700">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`text-xs font-bold ${
+                          isVoided ? "text-rose-500 line-through" : "text-emerald-700"
+                        }`}
+                      >
                         รวม {totalUnitsInOrder} ชิ้น · ฿{o.totalAmount.toLocaleString()}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setLastReceipt({
-                            orderNumber: o.orderNumber,
-                            items: o.items.map((it) => ({
-                              name: it.menuItem.name,
-                              qty: it.quantity,
-                              price: it.unitPrice,
-                            })),
-                            subtotal: o.totalAmount,
-                            vatAmt: 0,
-                            total: o.totalAmount,
-                            paymentMethod:
-                              o.status === "CHARGED_TO_ROOM" ? "โยนเข้าห้องพัก" : "เงินสด/โอน",
-                            cashReceived: o.totalAmount,
-                            change: 0,
-                            paidAt: new Date(o.createdAt).toLocaleString("th-TH"),
-                          })
-                        }
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-xs font-semibold"
-                      >
-                        <Printer className="w-3.5 h-3.5" /> พิมพ์สลิป
-                      </button>
+                      {!isVoided && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setLastReceipt({
+                                orderNumber: o.orderNumber,
+                                items: o.items.map((it) => ({
+                                  name: it.menuItem.name,
+                                  qty: it.quantity,
+                                  price: it.unitPrice,
+                                })),
+                                subtotal: o.totalAmount,
+                                vatAmt: 0,
+                                total: o.totalAmount,
+                                paymentMethod:
+                                  o.status === "CHARGED_TO_ROOM" ? "โยนเข้าห้องพัก" : "เงินสด/โอน",
+                                cashReceived: o.totalAmount,
+                                change: 0,
+                                paidAt: new Date(o.createdAt).toLocaleString("th-TH"),
+                              })
+                            }
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 text-xs font-semibold"
+                          >
+                            <Printer className="w-3.5 h-3.5" /> พิมพ์สลิป
+                          </button>
+                          {allowVoid ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setVoidOrderTarget(o);
+                                setVoidReason("");
+                                setVoidError("");
+                              }}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold"
+                            >
+                              <Ban className="w-3.5 h-3.5" /> ยกเลิกบิล (Void)
+                            </button>
+                          ) : (
+                            <span
+                              title="บิลย้อนหลังกรุณาติดต่อ Admin เพื่อยกเลิก"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-400 text-[11px] font-medium cursor-not-allowed"
+                            >
+                              บิลย้อนหลัง (ติดต่อ Admin)
+                            </span>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
+                  {o.notes && (
+                    <div className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-1.5 whitespace-pre-line">
+                      {o.notes}
+                    </div>
+                  )}
 
                   <div className="space-y-1.5">
                     {o.items.map((it, idx) => (
@@ -1317,6 +1429,105 @@ export function PosClient({
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Modal ยืนยันการยกเลิกบิล (Void) */}
+      {voidOrderTarget && (
+        <div className="no-print fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-md p-5 space-y-4">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Ban className="w-5 h-5 text-rose-600" />
+                  ยกเลิกบิล POS (Void)
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  เลขที่บิล <span className="font-mono font-bold text-slate-800">{voidOrderTarget.orderNumber}</span> · ยอดรวม{" "}
+                  <span className="font-bold text-rose-600">฿{voidOrderTarget.totalAmount.toLocaleString()}</span>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setVoidOrderTarget(null)}
+                className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 space-y-1">
+              <div className="font-semibold">เมื่อยืนยันยกเลิก ระบบจะดำเนินการอัตโนมัติ:</div>
+              <ul className="list-disc pl-4 space-y-0.5">
+                <li>คืนสต็อกสินค้าทุกรายการที่นับสต็อกกลับเข้าคลัง</li>
+                {voidOrderTarget.status === "CHARGED_TO_ROOM" ? (
+                  <li>ถอนยอดค่าใช้จ่ายออกจากบิลห้องพัก ({voidOrderTarget.stay?.room.roomNumber ?? "-"})</li>
+                ) : (
+                  <li>ยกเลิกยอดรับเงินของบิลนี้ออกจากรายงานสรุปยอดขาย</li>
+                )}
+                <li>บันทึกประวัติผู้ยกเลิกและเหตุผลลงใน Audit Log</li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-slate-700">
+                ระบุเหตุผลในการยกเลิกบิล <span className="text-rose-500">*</span>
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  "คีย์สินค้า/จำนวนผิด",
+                  "ลงผิดห้องพัก",
+                  "เลือกวิธีชำระผิด",
+                  "ลูกค้าเปลี่ยนใจ/ยกเลิก",
+                ].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setVoidReason(preset)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition ${
+                      voidReason === preset
+                        ? "bg-rose-600 text-white border-rose-600"
+                        : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="text"
+                value={voidReason}
+                onChange={(e) => setVoidReason(e.target.value)}
+                placeholder="พิมพ์เหตุผลการยกเลิกบิล..."
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+              />
+              {voidError && (
+                <p className="text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                  {voidError}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setVoidOrderTarget(null)}
+                disabled={voidSubmitting}
+                className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                ปิด
+              </button>
+              <button
+                type="button"
+                onClick={handleVoidOrder}
+                disabled={voidSubmitting || !voidReason.trim()}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-semibold"
+              >
+                {voidSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Ban className="w-3.5 h-3.5" />}
+                ยืนยันยกเลิกบิล (Void)
+              </button>
+            </div>
           </div>
         </div>
       )}

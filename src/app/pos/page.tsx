@@ -47,6 +47,7 @@ export default async function PosPage() {
         initialOrders={serializedOrders}
         vatRate={setting?.vatRate ?? 7}
         serviceRate={setting?.serviceChargeRate ?? 0}
+        userRole={user.role}
         propertySetting={{
           hotelName: setting?.hotelName || hotelName,
           address: setting?.address || "",

@@ -293,6 +293,140 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
+  if (body.action === "VOID_ORDER") {
+    const { orderId, reason } = body as { orderId?: string; reason?: string };
+    const cleanReason = String(reason ?? "").trim();
+    if (!orderId) {
+      return NextResponse.json({ error: "ไม่พบรหัสบิลที่ต้องการยกเลิก" }, { status: 400 });
+    }
+    if (!cleanReason) {
+      return NextResponse.json({ error: "กรุณาระบุเหตุผลในการยกเลิกบิล" }, { status: 400 });
+    }
+
+    const isAdminOrManager = ["OWNER", "MANAGER", "ADMIN"].includes(user.role);
+    const isFrontOrCashier = ["FRONT_DESK", "POS_CASHIER"].includes(user.role);
+    if (!isAdminOrManager && !isFrontOrCashier) {
+      return NextResponse.json({ error: "คุณไม่มีสิทธิ์ยกเลิกบิล POS" }, { status: 403 });
+    }
+
+    const existing = await prisma.posOrder.findUnique({
+      where: { id: orderId },
+      include: {
+        items: { include: { menuItem: true } },
+        stay: { include: { folio: true, room: true } },
+      },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "ไม่พบบิล POS ที่ต้องการยกเลิก" }, { status: 404 });
+    }
+    if (existing.status === "CANCELLED") {
+      return NextResponse.json({ error: "บิลนี้ถูกยกเลิกไปแล้ว" }, { status: 400 });
+    }
+
+    if (!isAdminOrManager) {
+      const bangkokFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" });
+      const todayStr = bangkokFmt.format(new Date());
+      const orderDateStr = bangkokFmt.format(existing.createdAt);
+      if (orderDateStr !== todayStr) {
+        return NextResponse.json(
+          { error: "พนักงานสามารถยกเลิกได้เฉพาะบิลของวันนี้เท่านั้น (บิลย้อนหลังกรุณาติดต่อ Admin)" },
+          { status: 403 }
+        );
+      }
+    }
+
+    if (existing.status === "CHARGED_TO_ROOM" && existing.stay && existing.stay.status !== "CHECKED_IN") {
+      return NextResponse.json(
+        { error: "ห้องพักนี้ Check-out ปิดบิลไปแล้ว ไม่สามารถยกเลิกบิล POS นี้ได้" },
+        { status: 400 }
+      );
+    }
+
+    try {
+      const updatedOrder = await prisma.$transaction(async (tx) => {
+        // 1. Restore stock for tracked items
+        for (const item of existing.items) {
+          if (item.menuItem.trackStock) {
+            await tx.menuItem.update({
+              where: { id: item.menuItemId },
+              data: { stockQty: { increment: item.quantity } },
+            });
+            await tx.supplyItem.updateMany({
+              where: { menuItemId: item.menuItemId },
+              data: { stockQty: { increment: item.quantity } },
+            });
+          }
+        }
+
+        // 2. Remove direct payments tied to this POS order
+        await tx.payment.deleteMany({
+          where: { posOrderId: existing.id },
+        });
+
+        // 3. Revert room folio charge if charged to room
+        if (existing.status === "CHARGED_TO_ROOM" && existing.stay?.folio) {
+          const folioItems = await tx.folioItem.findMany({
+            where: { posOrderId: existing.id },
+          });
+          const revertAmount = folioItems.reduce((sum, fi) => sum + fi.amount, 0);
+          if (folioItems.length > 0) {
+            await tx.folioItem.deleteMany({
+              where: { posOrderId: existing.id },
+            });
+            await tx.folio.update({
+              where: { id: existing.stay.folio.id },
+              data: {
+                totalCharges: { decrement: revertAmount },
+                balance: { decrement: revertAmount },
+              },
+            });
+          }
+        }
+
+        // 4. Release table if it was an open dine-in order
+        if (existing.tableId && existing.status === "PENDING") {
+          await tx.diningTable.update({
+            where: { id: existing.tableId },
+            data: { status: "AVAILABLE" },
+          });
+        }
+
+        const voidNote = `[VOID โดย ${user.name}: ${cleanReason}]`;
+        const nextNotes = existing.notes ? `${existing.notes}\n${voidNote}` : voidNote;
+
+        const updated = await tx.posOrder.update({
+          where: { id: existing.id },
+          data: {
+            status: "CANCELLED",
+            notes: nextNotes,
+          },
+          include: {
+            table: true,
+            stay: { include: { room: true, guest: true } },
+            items: { include: { menuItem: true } },
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            userId: user.id,
+            action: "POS_ORDER_VOID",
+            entityType: "PosOrder",
+            entityId: existing.orderNumber,
+            details: `ยกเลิกบิล ${existing.orderNumber} (ยอด ฿${existing.totalAmount.toLocaleString()}) · เหตุผล: ${cleanReason}`,
+          },
+        });
+
+        return updated;
+      });
+
+      return NextResponse.json({ order: updatedOrder });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "ยกเลิกบิลไม่สำเร็จ";
+      return NextResponse.json({ error: msg }, { status: 400 });
+    }
+  }
+
   return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 }
 
